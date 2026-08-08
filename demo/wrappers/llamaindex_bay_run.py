@@ -6,14 +6,17 @@ specialist models. Points at the LIVE Bay Run service. FunctionTool derives the
 tool description from each function's docstring, so they're written for selection.
 
     pip install llama-index-core httpx
-    export BAY_RUN_TOKEN=...   # get one at https://huggingbay.xyz
+    # Runs copy-paste with the baked-in public demo token below.
+    # For real volume: export BAY_RUN_TOKEN=...   (mint one at https://huggingbay.xyz/tokens)
 """
 import os
 import httpx
 from llama_index.core.tools import FunctionTool
 
 BASE = os.environ.get("BAY_RUN_BASE_URL", "https://bay-run-mvp-zfmlsu2yla-uc.a.run.app")
-HEADERS = {"Authorization": f"Bearer {os.environ.get('BAY_RUN_TOKEN', '')}",
+# Public, rate-limited demo token so this file runs copy-paste. Override with BAY_RUN_TOKEN.
+DEMO_TOKEN = "bayrun-demo-AS4XgfRmTHgNXRlpuP19zKeMxbcShyvP"
+HEADERS = {"Authorization": f"Bearer {os.environ.get('BAY_RUN_TOKEN', DEMO_TOKEN)}",
            "Content-Type": "application/json"}
 
 
@@ -92,8 +95,35 @@ def extract(model: str, content: str, schema: dict = None, instructions: str = N
             "raw": resp["choices"][0]["message"]["content"], "usage": resp.get("usage")}
 
 
+def route(task_hint: str, kind: str = "auto", serve: bool = False, input=None,
+          query: str = None, documents: list = None, content: str = None,
+          schema: dict = None) -> dict:
+    """RUNTIME auto-router: hand Bay Run a job you can't name a model for and it picks the
+    best mirrored specialist per-request at inference time — zero examples, instant. kind =
+    embedding|rerank|generative|auto. Set serve=True plus the matching inputs (embedding:
+    input; rerank: query+documents; generative: content, optional schema) to route AND serve
+    in one call. Returns {routed_model, routing_reason, mirrored, candidates_considered, serve,
+    note}. HEURISTIC (mirrored-first -> kind-match -> verified_runs/downloads) — the pick is
+    UNPROVEN; prove it with find_specialist_for_task. Also reachable as model="auto" on
+    embed/rerank."""
+    payload = {"task_hint": task_hint, "kind": kind}
+    if serve:
+        payload["serve"] = True
+        if input is not None:
+            payload["input"] = input
+        if query is not None:
+            payload["query"] = query
+        if documents is not None:
+            payload["documents"] = documents
+        if content is not None:
+            payload["content"] = content
+        if schema is not None:
+            payload["schema"] = schema
+    return _post("/v1/route", payload, timeout=600)
+
+
 BAY_RUN_TOOLS = [FunctionTool.from_defaults(fn=f) for f in
-                 (find_specialist_for_task, discover_models, eval_models, embed, rerank, extract)]
+                 (find_specialist_for_task, route, discover_models, eval_models, embed, rerank, extract)]
 # Usage: agent = FunctionAgent(tools=BAY_RUN_TOOLS, llm=llm)
 #
 # Remote MCP alternative (no wrappers needed): point an MCP client at

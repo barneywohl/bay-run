@@ -2,8 +2,8 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.barneywohl/bay-run",
   "title": "Bay Run",
-  "description": "Discover, prove, and serve small open specialist models (embeddings, rerank) — OpenAI-compatible.",
-  "version": "1.0.0",
+  "description": "Discover, prove & serve small open specialist models: embeddings, rerank, extract — OpenAI-compat.",
+  "version": "1.0.1",
   "websiteUrl": "https://huggingbay.xyz",
   "repository": {
     "url": "https://github.com/barneywohl/bay-run",
@@ -27,6 +27,7 @@
     "io.modelcontextprotocol.registry/publisher-provided": {
       "tools": [
         "find_specialist_for_task",
+        "route",
         "discover_models",
         "eval_models",
         "embed",
@@ -42,6 +43,7 @@
         "reranking",
         "model-discovery",
         "model-evaluation",
+        "runtime-routing",
         "structured-extraction",
         "specialist-models",
         "sentence-transformers",

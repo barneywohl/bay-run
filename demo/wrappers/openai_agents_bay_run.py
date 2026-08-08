@@ -7,13 +7,16 @@ Two ways to use this file:
   (B) OpenAI Agents SDK @function_tool wrappers (pip install openai-agents).
 
 Both point at the LIVE Bay Run service. Descriptions are written for model
-tool-selection. export BAY_RUN_TOKEN=...  (get one at https://huggingbay.xyz)
+tool-selection. Runs copy-paste with the baked-in public demo token below; for real
+volume export BAY_RUN_TOKEN=...  (mint one at https://huggingbay.xyz/tokens).
 """
 import os
 import httpx
 
 BASE = os.environ.get("BAY_RUN_BASE_URL", "https://bay-run-mvp-zfmlsu2yla-uc.a.run.app")
-HEADERS = {"Authorization": f"Bearer {os.environ.get('BAY_RUN_TOKEN', '')}",
+# Public, rate-limited demo token so this file runs copy-paste. Override with BAY_RUN_TOKEN.
+DEMO_TOKEN = "bayrun-demo-AS4XgfRmTHgNXRlpuP19zKeMxbcShyvP"
+HEADERS = {"Authorization": f"Bearer {os.environ.get('BAY_RUN_TOKEN', DEMO_TOKEN)}",
            "Content-Type": "application/json"}
 
 
@@ -51,6 +54,39 @@ FUNCTION_SPECS = [
                     "kind": {"type": "string", "enum": ["embedding", "rerank", "any"], "default": "any"},
                 },
                 "required": ["task", "my_examples"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "bay_run_route",
+            "description": (
+                "RUNTIME auto-router: hand Bay Run a job you can't name a model for and it "
+                "picks the best mirrored specialist per-request at inference time — zero "
+                "examples, instant. Optionally serves in the same call. HEURISTIC "
+                "(mirrored-first -> kind-match -> verified_runs/downloads); the pick is "
+                "UNPROVEN — prove it with bay_run_find_specialist. The same router is also "
+                "reachable as model='auto' on bay_run_embed / bay_run_rerank."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "task_hint": {"type": "string",
+                                  "description": "Plain-language job, e.g. 'embed support tickets for semantic search'."},
+                    "kind": {"type": "string",
+                             "enum": ["embedding", "rerank", "generative", "auto"],
+                             "default": "auto"},
+                    "serve": {"type": "boolean", "default": False,
+                              "description": "If true, also serve in the same call — supply the matching inputs."},
+                    "input": {"description": "embedding serve: string or list of strings."},
+                    "query": {"type": "string", "description": "rerank serve: the query."},
+                    "documents": {"type": "array", "items": {"type": "string"},
+                                  "description": "rerank serve: candidate documents."},
+                    "content": {"type": "string", "description": "generative serve: raw text/HTML."},
+                    "schema": {"type": "object", "description": "generative serve: optional JSON schema."},
+                },
+                "required": ["task_hint"],
             },
         },
     },
@@ -173,6 +209,14 @@ def call_bay_run_tool(name: str, args: dict) -> dict:
                                 "dataset": args["my_examples"], "k": 5}, timeout=600)
         return {"winner": ev.get("winner"), "scorecard": ev.get("scorecard"),
                 "serve_endpoint": f"{BASE}/v1/{'rerank' if et=='rerank' else 'embeddings'}"}
+    if name == "bay_run_route":
+        p = {"task_hint": args["task_hint"], "kind": args.get("kind", "auto")}
+        if args.get("serve"):
+            p["serve"] = True
+            for f in ("input", "query", "documents", "content", "schema"):
+                if args.get(f) is not None:
+                    p[f] = args[f]
+        return _post("/v1/route", p, timeout=600)
     if name == "bay_run_discover_models":
         return _post("/v1/discover", {"query": args["query"], "kind": args.get("kind", "any"),
                                       "limit": args.get("limit", 5)}, timeout=60)

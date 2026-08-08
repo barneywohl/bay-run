@@ -111,8 +111,10 @@ Pricing sources (Aug 2026):
 - **Cold start is real.** Scale-to-zero + first-time model load from the mirror can take 20–50 s on the
   very first call (we saw a 32 s first embedding call, and one candidate cold-loaded in 52 s inside an
   eval). Warm steady-state is ~100 ms. For latency-critical paths you keep one instance warm.
-- **This is retrieval/classification, not generative extraction.** The live endpoints do embeddings +
-  rerank. HTML→structured-JSON *generative* extraction is on the roadmap, not in this demo — see the roadmap note in the repo README.
+- **This demo exercises retrieval/classification, not generative extraction.** It hand-runs the
+  embeddings + rerank path. HTML→structured-JSON *generative* extraction is also LIVE now (the
+  `extract` tool / `POST /v1/chat/completions`, model="auto" supported) — it's just not exercised
+  in this particular ticket-routing walkthrough. Bay Run exposes 7 MCP tools in total; see the repo README.
 - **The cost win is vs the naive LLM-classification pattern**, which is exactly what the target persona is
   overpaying for. Against a tuned embedding-API + self-hosted search you're competing on lock-in,
   neutrality, and the eval — not raw token price.

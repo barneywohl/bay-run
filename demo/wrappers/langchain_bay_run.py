@@ -6,14 +6,17 @@ models autonomously. Points at the LIVE Bay Run service. Docstrings are written 
 LangChain's tool-selection (the agent reads the @tool docstring).
 
     pip install langchain-core httpx
-    export BAY_RUN_TOKEN=...   # get one at https://huggingbay.xyz
+    # Runs copy-paste with the baked-in public demo token below.
+    # For real volume: export BAY_RUN_TOKEN=...   (mint one at https://huggingbay.xyz/tokens)
 """
 import os
 import httpx
 from langchain_core.tools import tool
 
 BASE = os.environ.get("BAY_RUN_BASE_URL", "https://bay-run-mvp-zfmlsu2yla-uc.a.run.app")
-HEADERS = {"Authorization": f"Bearer {os.environ.get('BAY_RUN_TOKEN', '')}",
+# Public, rate-limited demo token so this file runs copy-paste. Override with BAY_RUN_TOKEN.
+DEMO_TOKEN = "bayrun-demo-AS4XgfRmTHgNXRlpuP19zKeMxbcShyvP"
+HEADERS = {"Authorization": f"Bearer {os.environ.get('BAY_RUN_TOKEN', DEMO_TOKEN)}",
            "Content-Type": "application/json"}
 
 
@@ -98,7 +101,35 @@ def bay_run_extract(model: str, content: str, schema: dict = None, instructions:
             "raw": resp["choices"][0]["message"]["content"], "usage": resp.get("usage")}
 
 
-BAY_RUN_TOOLS = [bay_run_find_specialist, bay_run_discover_models,
+@tool
+def bay_run_route(task_hint: str, kind: str = "auto", serve: bool = False,
+                  input=None, query: str = None, documents: list = None,
+                  content: str = None, schema: dict = None) -> dict:
+    """RUNTIME auto-router: hand Bay Run a job you can't name a model for and it picks the
+    best mirrored specialist per-request at inference time — zero examples, instant. `kind` =
+    embedding|rerank|generative|auto. Set `serve=True` plus the matching inputs (embedding:
+    `input`; rerank: `query`+`documents`; generative: `content`, optional `schema`) to route
+    AND serve in one call. Returns {routed_model, routing_reason, mirrored,
+    candidates_considered, serve, note}. HEURISTIC (mirrored-first -> kind-match ->
+    verified_runs/downloads) — the pick is UNPROVEN; prove it with bay_run_find_specialist.
+    The same router is also reachable as model=\"auto\" on bay_run_embed/bay_run_rerank."""
+    payload = {"task_hint": task_hint, "kind": kind}
+    if serve:
+        payload["serve"] = True
+        if input is not None:
+            payload["input"] = input
+        if query is not None:
+            payload["query"] = query
+        if documents is not None:
+            payload["documents"] = documents
+        if content is not None:
+            payload["content"] = content
+        if schema is not None:
+            payload["schema"] = schema
+    return _post("/v1/route", payload, timeout=600)
+
+
+BAY_RUN_TOOLS = [bay_run_find_specialist, bay_run_route, bay_run_discover_models,
                  bay_run_eval_models, bay_run_embed, bay_run_rerank, bay_run_extract]
 # Usage: agent = create_react_agent(llm, BAY_RUN_TOOLS)
 #

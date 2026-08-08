@@ -1,9 +1,11 @@
 # Bay Run MCP — make your agent discover → eval → serve specialists, autonomously
 
-Give any MCP agent (Claude Desktop, Claude Code, Cursor, your own) four tools:
-`discover_models`, `eval_models`, `embed`, `rerank`. The agent can then find the right
-open specialist for a narrow task, prove it on your labeled data, and serve it — without you
-wiring any of it by hand.
+Give any MCP agent (Claude Desktop, Claude Code, Cursor, your own) all 7 tools:
+`find_specialist_for_task`, `route`, `discover_models`, `eval_models`, `embed`, `rerank`,
+`extract`. The agent can then find the right open specialist for a narrow task, prove it on
+your labeled data, and serve it — without you wiring any of it by hand. (`route` skips the
+labeled-data step: it picks a specialist per-request at inference time; `extract` turns messy
+HTML/text into schema-guided JSON.)
 
 The live service is authenticated, so the MCP server has to forward your bearer token. Use the
 auth-enabled server in this folder: [`mcp/bay_run_mcp.py`](./mcp/bay_run_mcp.py).
