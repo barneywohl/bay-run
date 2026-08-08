@@ -2,8 +2,8 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.barneywohl/bay-run",
   "title": "Bay Run",
-  "description": "Discover, prove & serve small open specialist models: embeddings, rerank, extract — OpenAI-compat.",
-  "version": "1.0.1",
+  "description": "Discover, prove & serve small open specialist models: embeddings, rerank, classify (guardrail/moderation/sentiment/NLI zero-shot), extract — OpenAI-compat.",
+  "version": "1.1.0",
   "websiteUrl": "https://huggingbay.xyz",
   "repository": {
     "url": "https://github.com/barneywohl/bay-run",
@@ -27,11 +27,13 @@
     "io.modelcontextprotocol.registry/publisher-provided": {
       "tools": [
         "find_specialist_for_task",
+        "request_specialist",
         "route",
         "discover_models",
         "eval_models",
         "embed",
         "rerank",
+        "classify",
         "extract"
       ],
       "openai_compatible_base_url": "https://bay-run-mvp-zfmlsu2yla-uc.a.run.app/v1",
@@ -41,6 +43,11 @@
       "keywords": [
         "embeddings",
         "reranking",
+        "text-classification",
+        "guardrails",
+        "content-moderation",
+        "zero-shot-classification",
+        "sentiment-analysis",
         "model-discovery",
         "model-evaluation",
         "runtime-routing",

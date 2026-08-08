@@ -1,8 +1,9 @@
 """
 Bay Run MCP server (auth-enabled) — point any MCP agent at the LIVE Bay Run service.
 
-Exposes all 7 tools so an agent can run the whole loop autonomously:
-    find_specialist_for_task · route · discover_models · eval_models · embed · rerank · extract
+Exposes all 9 tools so an agent can run the whole loop autonomously:
+    find_specialist_for_task · request_specialist · route · discover_models · eval_models ·
+    embed · rerank · classify · extract
 
 This mirrors the tool surface of the LIVE remote MCP endpoint
 (https://bay-run-mvp-zfmlsu2yla-uc.a.run.app/mcp/); use this stdio wrapper when you want a
@@ -119,6 +120,35 @@ def extract(model: str, content: str, schema: dict | None = None,
     }, 600)
     return {"model": model, "data": resp.get("parsed"), "json_valid": resp.get("json_valid"),
             "raw": resp["choices"][0]["message"]["content"], "usage": resp.get("usage")}
+
+
+@mcp.tool()
+def classify(model: str, input: str | list[str], candidate_labels: list[str] | None = None,
+             multi_label: bool = False, top_k: int | None = None) -> dict:
+    """Classify text with a small CPU-served specialist — guardrail / moderation / sentiment /
+    intent / NLI. FIXED-LABEL: model = any HF sequence-classification id (e.g.
+    'protectai/deberta-v3-base-prompt-injection-v2', 'unitary/toxic-bert') -> the model's own
+    labels + scores. ZERO-SHOT: pass candidate_labels with an NLI model like
+    'facebook/bart-large-mnli' (or model='auto') -> entailment-scored labels, no training.
+    Returns {model, labels:[{label,score}], zero_shot}."""
+    payload: dict = {"model": model, "input": input, "multi_label": multi_label}
+    if candidate_labels is not None:
+        payload["candidate_labels"] = candidate_labels
+    if top_k is not None:
+        payload["top_k"] = top_k
+    return _post("/v1/classify", payload, 300)
+
+
+@mcp.tool()
+def request_specialist(task: str, examples: list[dict] | None = None, kind: str = "any") -> dict:
+    """Ask Bay Run for a specialist — and NEVER get a dead end. If a servable specialist exists,
+    chains discover -> (eval if you pass examples) -> a ready-to-call serve pointer. If none
+    exists yet, RECORDS your demand as a pull signal and returns {status:'recorded',
+    subscribe_hint}. kind = embedding|rerank|generative|classification|zeroshot|any."""
+    payload: dict = {"task": task, "kind": kind}
+    if examples is not None:
+        payload["examples"] = examples
+    return _post("/v1/request_specialist", payload, 600)
 
 
 if __name__ == "__main__":

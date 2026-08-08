@@ -55,8 +55,8 @@ client.embeddings.create(model="BAAI/bge-small-en-v1.5", input=["hello"])
 ```
 
 ## MCP (agent-callable)
-Add the remote server `https://bay-run-mvp-zfmlsu2yla-uc.a.run.app/mcp/` to your MCP client (Bearer auth). 7 tools:
-`find_specialist_for_task` (discover→eval→serve on your labeled data), `route` (runtime auto-router — no examples, picks a specialist per-request), `discover_models`, `eval_models`, `embed`, `rerank`, `extract` (HTML/text → schema-guided JSON).
+Add the remote server `https://bay-run-mvp-zfmlsu2yla-uc.a.run.app/mcp/` to your MCP client (Bearer auth). 9 tools:
+`find_specialist_for_task` (discover→eval→serve on your labeled data), `request_specialist` (serve-or-capture — returns a serve pointer if a specialist exists, else records your demand), `route` (runtime auto-router — no examples, picks a specialist per-request), `discover_models`, `eval_models`, `embed`, `rerank`, `classify` (guardrail/moderation/sentiment/intent, or zero-shot via candidate_labels + an NLI model), `extract` (HTML/text → schema-guided JSON).
 
 Served from a content-addressed, quarantine-gated mirror. Neutral — it helps you pick the
 model that wins on *your* data, not sell you one. Backend is closed; this repo is the

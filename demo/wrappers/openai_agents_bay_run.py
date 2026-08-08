@@ -191,6 +191,56 @@ FUNCTION_SPECS = [
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "bay_run_classify",
+            "description": (
+                "Classify text with a small CPU-served specialist — the guardrail / safety / "
+                "moderation / sentiment / intent / NLI layer agents need. FIXED-LABEL: model = "
+                "any HF sequence-classification id (e.g. prompt-injection or toxicity) -> the "
+                "model's own labels + scores. ZERO-SHOT: pass candidate_labels with an NLI model "
+                "like 'facebook/bart-large-mnli' (or model='auto') -> entailment-scored labels, "
+                "no training. Returns {model, labels:[{label,score}], zero_shot}."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "model": {"type": "string",
+                              "description": "HF sequence-classification id, an NLI id for zero-shot, or 'auto'."},
+                    "input": {"type": "string", "description": "Text (or list of texts) to classify."},
+                    "candidate_labels": {"type": "array", "items": {"type": "string"},
+                                         "description": "Present => zero-shot mode (your own labels)."},
+                    "multi_label": {"type": "boolean"},
+                    "top_k": {"type": "integer"},
+                },
+                "required": ["model", "input"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "bay_run_request_specialist",
+            "description": (
+                "Serve-or-capture: if a specialist for your task EXISTS, chains discover -> "
+                "(eval if you pass examples) -> a ready-to-call serve pointer; if NONE exists yet, "
+                "RECORDS your demand as a pull signal and returns {status:'recorded'}. Never a "
+                "dead end. Use as your safe default when unsure Bay Run already covers the task."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "task": {"type": "string", "description": "Plain-language task description."},
+                    "examples": {"type": "array", "items": {"type": "object"},
+                                 "description": "Optional labeled examples (find_specialist shape)."},
+                    "kind": {"type": "string",
+                             "description": "embedding|rerank|generative|classification|zeroshot|any."},
+                },
+                "required": ["task"],
+            },
+        },
+    },
 ]
 
 
@@ -243,6 +293,19 @@ def call_bay_run_tool(name: str, args: dict) -> dict:
         return {"model": args["model"], "data": resp.get("parsed"),
                 "json_valid": resp.get("json_valid"),
                 "raw": resp["choices"][0]["message"]["content"], "usage": resp.get("usage")}
+    if name == "bay_run_classify":
+        p = {"model": args["model"], "input": args["input"],
+             "multi_label": args.get("multi_label", False)}
+        if args.get("candidate_labels") is not None:
+            p["candidate_labels"] = args["candidate_labels"]
+        if args.get("top_k") is not None:
+            p["top_k"] = args["top_k"]
+        return _post("/v1/classify", p, timeout=300)
+    if name == "bay_run_request_specialist":
+        p = {"task": args["task"], "kind": args.get("kind", "any")}
+        if args.get("examples") is not None:
+            p["examples"] = args["examples"]
+        return _post("/v1/request_specialist", p, timeout=600)
     raise ValueError(f"unknown tool {name}")
 
 

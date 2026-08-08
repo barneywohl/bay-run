@@ -129,8 +129,41 @@ def bay_run_route(task_hint: str, kind: str = "auto", serve: bool = False,
     return _post("/v1/route", payload, timeout=600)
 
 
-BAY_RUN_TOOLS = [bay_run_find_specialist, bay_run_route, bay_run_discover_models,
-                 bay_run_eval_models, bay_run_embed, bay_run_rerank, bay_run_extract]
+@tool
+def bay_run_classify(model: str, input, candidate_labels: list[str] = None,
+                     multi_label: bool = False, top_k: int = None) -> dict:
+    """Classify text with a small CPU-served specialist — the guardrail / safety / moderation /
+    sentiment / intent / NLI layer agents need. FIXED-LABEL: `model` = any HF
+    sequence-classification id (e.g. 'protectai/deberta-v3-base-prompt-injection-v2',
+    'unitary/toxic-bert', a sentiment model) -> the model's OWN labels + scores. ZERO-SHOT: pass
+    `candidate_labels` (your own labels) with an NLI model like 'facebook/bart-large-mnli' (or
+    model='auto') -> entailment-scored labels, no training. `multi_label`=True scores labels
+    independently; `top_k` keeps the best K. Returns {model, labels:[{label,score}], zero_shot}."""
+    payload = {"model": model, "input": input, "multi_label": multi_label}
+    if candidate_labels is not None:
+        payload["candidate_labels"] = candidate_labels
+    if top_k is not None:
+        payload["top_k"] = top_k
+    return _post("/v1/classify", payload, timeout=300)
+
+
+@tool
+def bay_run_request_specialist(task: str, examples: list[dict] = None, kind: str = "any") -> dict:
+    """Ask Bay Run for a specialist — and NEVER get a dead end. If a servable specialist EXISTS,
+    chains discover -> (eval, if you pass `examples`) -> returns a ready-to-call serve pointer. If
+    NONE exists yet, RECORDS your demand as a pull signal and returns {status:'recorded',
+    subscribe_hint}. `task` = plain-language description; optional `examples` follow the
+    find_specialist shape; `kind` = embedding|rerank|generative|classification|zeroshot|any. Use
+    as your safe default when unsure Bay Run already covers the task."""
+    payload = {"task": task, "kind": kind}
+    if examples is not None:
+        payload["examples"] = examples
+    return _post("/v1/request_specialist", payload, timeout=600)
+
+
+BAY_RUN_TOOLS = [bay_run_find_specialist, bay_run_request_specialist, bay_run_route,
+                 bay_run_discover_models, bay_run_eval_models, bay_run_embed, bay_run_rerank,
+                 bay_run_classify, bay_run_extract]
 # Usage: agent = create_react_agent(llm, BAY_RUN_TOOLS)
 #
 # Remote MCP alternative (no wrappers needed): point an MCP client at

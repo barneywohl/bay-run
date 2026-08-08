@@ -122,8 +122,37 @@ def route(task_hint: str, kind: str = "auto", serve: bool = False, input=None,
     return _post("/v1/route", payload, timeout=600)
 
 
+def classify(model: str, input, candidate_labels: list = None,
+             multi_label: bool = False, top_k: int = None) -> dict:
+    """Classify text with a small CPU-served specialist — guardrail / moderation / sentiment /
+    intent / NLI. FIXED-LABEL: model = any HF sequence-classification id (e.g.
+    'protectai/deberta-v3-base-prompt-injection-v2', 'unitary/toxic-bert') -> the model's own
+    labels + scores. ZERO-SHOT: pass candidate_labels with an NLI model like
+    'facebook/bart-large-mnli' (or model='auto') -> entailment-scored labels, no training.
+    multi_label=True scores labels independently; top_k keeps the best K. Returns
+    {model, labels:[{label,score}], zero_shot}."""
+    payload = {"model": model, "input": input, "multi_label": multi_label}
+    if candidate_labels is not None:
+        payload["candidate_labels"] = candidate_labels
+    if top_k is not None:
+        payload["top_k"] = top_k
+    return _post("/v1/classify", payload, timeout=300)
+
+
+def request_specialist(task: str, examples: list = None, kind: str = "any") -> dict:
+    """Ask Bay Run for a specialist — and NEVER get a dead end. If a servable specialist exists,
+    chains discover -> (eval if you pass examples) -> a ready-to-call serve pointer. If none
+    exists yet, RECORDS your demand as a pull signal and returns {status:'recorded',
+    subscribe_hint}. kind = embedding|rerank|generative|classification|zeroshot|any."""
+    payload = {"task": task, "kind": kind}
+    if examples is not None:
+        payload["examples"] = examples
+    return _post("/v1/request_specialist", payload, timeout=600)
+
+
 BAY_RUN_TOOLS = [FunctionTool.from_defaults(fn=f) for f in
-                 (find_specialist_for_task, route, discover_models, eval_models, embed, rerank, extract)]
+                 (find_specialist_for_task, request_specialist, route, discover_models,
+                  eval_models, embed, rerank, classify, extract)]
 # Usage: agent = FunctionAgent(tools=BAY_RUN_TOOLS, llm=llm)
 #
 # Remote MCP alternative (no wrappers needed): point an MCP client at
