@@ -1,0 +1,141 @@
+{
+  "_comment": "The agent intent-routing task. 'intents' = your routing taxonomy; each has a few example utterances used to build a centroid (the average embedding of its examples). 'test' = UNSEEN user messages with gold labels, held out from the centroids, used to measure real routing accuracy. Swap this for YOUR intents + YOUR phrasing — the winning embedder is picked on YOUR data, not a public leaderboard.",
+  "intents": [
+    {
+      "key": "billing",
+      "label": "Billing: charges, invoices, and payment methods",
+      "train": [
+        "why was i charged twice this month",
+        "i need a copy of my invoice for accounting",
+        "how do i update the credit card on my account",
+        "my payment keeps getting declined at checkout",
+        "what is this charge on my statement from you"
+      ]
+    },
+    {
+      "key": "tech_support",
+      "label": "Technical support: something is broken or erroring",
+      "train": [
+        "the app crashes every time i open the dashboard",
+        "i keep getting a 500 error when i hit save",
+        "uploads just spin forever and never finish",
+        "the page is completely blank after i log in",
+        "sync stopped working since the last update"
+      ]
+    },
+    {
+      "key": "cancel",
+      "label": "Cancellation: stop or downgrade the subscription",
+      "train": [
+        "i want to cancel my subscription please",
+        "how do i turn off auto renewal",
+        "take me down to the free plan",
+        "i no longer want to be billed going forward",
+        "close my account at the end of the period"
+      ]
+    },
+    {
+      "key": "sales",
+      "label": "Sales: pricing, plans, and upgrades",
+      "train": [
+        "what does the enterprise plan include",
+        "can i get a demo for my team of fifty",
+        "do you offer annual pricing discounts",
+        "i want to upgrade to the pro tier",
+        "is there a volume discount for nonprofits"
+      ]
+    },
+    {
+      "key": "refund",
+      "label": "Refund: request money back for a charge",
+      "train": [
+        "i want my money back for last month",
+        "please refund the duplicate charge",
+        "can i get a refund since i never used it",
+        "you charged me after i cancelled, refund it",
+        "i'd like a partial refund for the outage"
+      ]
+    },
+    {
+      "key": "docs",
+      "label": "Documentation: how-to and API usage questions",
+      "train": [
+        "how do i authenticate against your rest api",
+        "where are the docs for the webhooks",
+        "what is the rate limit on the embeddings endpoint",
+        "how do i paginate through the results",
+        "is there a code sample for the python sdk"
+      ]
+    },
+    {
+      "key": "escalate",
+      "label": "Escalation: reach a human or a manager",
+      "train": [
+        "i need to talk to a real person now",
+        "get me a manager, this is unacceptable",
+        "stop sending me bots, connect me to support",
+        "i've asked three times, escalate this ticket",
+        "can someone senior actually call me back"
+      ]
+    },
+    {
+      "key": "account",
+      "label": "Account access: login, password, and profile",
+      "train": [
+        "i can't log in, it says my password is wrong",
+        "how do i reset my password",
+        "i'm locked out after too many attempts",
+        "how do i change the email on my profile",
+        "the magic link never arrives in my inbox"
+      ]
+    },
+    {
+      "key": "security",
+      "label": "Security: unauthorized access or compromise",
+      "train": [
+        "someone from another country logged into my account",
+        "i think my account was hacked",
+        "there are logins i don't recognize in my activity",
+        "how do i turn on two factor authentication",
+        "i got an alert about a new device i didn't use"
+      ]
+    },
+    {
+      "key": "feedback",
+      "label": "Feedback: feature requests and product suggestions",
+      "train": [
+        "you should really add a dark mode",
+        "it would be great to have csv export",
+        "here's an idea for improving the editor",
+        "i love the new layout, one small suggestion",
+        "please consider supporting single sign on"
+      ]
+    }
+  ],
+  "test": [
+    {"message": "hey my card got declined but you still show my plan as active?", "gold": "billing"},
+    {"message": "can you send me the receipt for the august payment", "gold": "billing"},
+    {"message": "everything white-screens right after the latest release, nothing loads", "gold": "tech_support"},
+    {"message": "the export button throws an error code and does nothing", "gold": "tech_support"},
+    {"message": "please stop billing me, i'm done with the service", "gold": "cancel"},
+    {"message": "how do i switch off the automatic renewal before friday", "gold": "cancel"},
+    {"message": "interested in rolling this out to 300 people, do you do custom pricing", "gold": "sales"},
+    {"message": "what's the difference between the team and business tiers", "gold": "sales"},
+    {"message": "i was billed for a year i never used, i want it back", "gold": "refund"},
+    {"message": "can i be reimbursed for the downtime last week", "gold": "refund"},
+    {"message": "which header do i pass the bearer token in for the api", "gold": "docs"},
+    {"message": "do you have an example of calling the endpoint from node", "gold": "docs"},
+    {"message": "i'm sick of the runaround, put me through to a supervisor", "gold": "escalate"},
+    {"message": "this is my last try before i dispute the charge, get me a human", "gold": "escalate"},
+    {"message": "the reset email won't show up and i still can't sign in", "gold": "account"},
+    {"message": "i need to point my login to a new work address", "gold": "account"},
+    {"message": "there's a sign-in from a device in another state that wasn't me", "gold": "security"},
+    {"message": "how do i set up 2fa so this doesn't happen again", "gold": "security"},
+    {"message": "any chance you'll ship a native ipad app someday", "gold": "feedback"},
+    {"message": "small request: let us reorder columns in the table view", "gold": "feedback"},
+    {"message": "my invoice total doesn't match what your pricing page says", "gold": "billing"},
+    {"message": "the mobile client freezes on the loading spinner forever", "gold": "tech_support"},
+    {"message": "i already cancelled last month, why am i seeing another charge, refund it", "gold": "refund"},
+    {"message": "someone changed my password and i'm now locked out completely", "gold": "security"}
+  ]
+}

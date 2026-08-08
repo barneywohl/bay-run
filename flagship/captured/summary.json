@@ -1,0 +1,189 @@
+{
+  "base": "https://bay-run-mvp-zfmlsu2yla-uc.a.run.app",
+  "winner": "thenlper/gte-small",
+  "eval_primary_metric": "mrr",
+  "eval_scorecard": [
+    {
+      "model": "thenlper/gte-small",
+      "mrr": 0.9117,
+      "verified": true,
+      "error": null
+    },
+    {
+      "model": "sentence-transformers/all-MiniLM-L6-v2",
+      "mrr": 0.8767,
+      "verified": true,
+      "error": null
+    },
+    {
+      "model": "BAAI/bge-small-en-v1.5",
+      "mrr": 0.875,
+      "verified": true,
+      "error": null
+    },
+    {
+      "model": "sentence-transformers/average_word_embeddings_glove.6B.300d",
+      "mrr": 0.795,
+      "verified": false,
+      "error": null
+    }
+  ],
+  "n_intents": 10,
+  "n_test": 24,
+  "routing_accuracy": 0.9583333333333334,
+  "routing_correct": 23,
+  "warm_latency_ms_median": 143.48101615905762,
+  "warm_latency_ms_p95": 152.10890769958496,
+  "cost_per_1M": {
+    "gpt4o_mini_llm_route": 57.3,
+    "openai_embed_only": 0.4,
+    "bay_run_cpu": 4.1609
+  },
+  "cost_ratio_llm_over_bayrun": 13.8,
+  "routed": [
+    {
+      "message": "hey my card got declined but you still show my plan as active?",
+      "gold": "billing",
+      "pred": "billing",
+      "ok": true
+    },
+    {
+      "message": "can you send me the receipt for the august payment",
+      "gold": "billing",
+      "pred": "billing",
+      "ok": true
+    },
+    {
+      "message": "everything white-screens right after the latest release, nothing loads",
+      "gold": "tech_support",
+      "pred": "tech_support",
+      "ok": true
+    },
+    {
+      "message": "the export button throws an error code and does nothing",
+      "gold": "tech_support",
+      "pred": "tech_support",
+      "ok": true
+    },
+    {
+      "message": "please stop billing me, i'm done with the service",
+      "gold": "cancel",
+      "pred": "cancel",
+      "ok": true
+    },
+    {
+      "message": "how do i switch off the automatic renewal before friday",
+      "gold": "cancel",
+      "pred": "cancel",
+      "ok": true
+    },
+    {
+      "message": "interested in rolling this out to 300 people, do you do custom pricing",
+      "gold": "sales",
+      "pred": "sales",
+      "ok": true
+    },
+    {
+      "message": "what's the difference between the team and business tiers",
+      "gold": "sales",
+      "pred": "sales",
+      "ok": true
+    },
+    {
+      "message": "i was billed for a year i never used, i want it back",
+      "gold": "refund",
+      "pred": "refund",
+      "ok": true
+    },
+    {
+      "message": "can i be reimbursed for the downtime last week",
+      "gold": "refund",
+      "pred": "refund",
+      "ok": true
+    },
+    {
+      "message": "which header do i pass the bearer token in for the api",
+      "gold": "docs",
+      "pred": "docs",
+      "ok": true
+    },
+    {
+      "message": "do you have an example of calling the endpoint from node",
+      "gold": "docs",
+      "pred": "docs",
+      "ok": true
+    },
+    {
+      "message": "i'm sick of the runaround, put me through to a supervisor",
+      "gold": "escalate",
+      "pred": "escalate",
+      "ok": true
+    },
+    {
+      "message": "this is my last try before i dispute the charge, get me a human",
+      "gold": "escalate",
+      "pred": "escalate",
+      "ok": true
+    },
+    {
+      "message": "the reset email won't show up and i still can't sign in",
+      "gold": "account",
+      "pred": "account",
+      "ok": true
+    },
+    {
+      "message": "i need to point my login to a new work address",
+      "gold": "account",
+      "pred": "account",
+      "ok": true
+    },
+    {
+      "message": "there's a sign-in from a device in another state that wasn't me",
+      "gold": "security",
+      "pred": "security",
+      "ok": true
+    },
+    {
+      "message": "how do i set up 2fa so this doesn't happen again",
+      "gold": "security",
+      "pred": "security",
+      "ok": true
+    },
+    {
+      "message": "any chance you'll ship a native ipad app someday",
+      "gold": "feedback",
+      "pred": "feedback",
+      "ok": true
+    },
+    {
+      "message": "small request: let us reorder columns in the table view",
+      "gold": "feedback",
+      "pred": "feedback",
+      "ok": true
+    },
+    {
+      "message": "my invoice total doesn't match what your pricing page says",
+      "gold": "billing",
+      "pred": "billing",
+      "ok": true
+    },
+    {
+      "message": "the mobile client freezes on the loading spinner forever",
+      "gold": "tech_support",
+      "pred": "tech_support",
+      "ok": true
+    },
+    {
+      "message": "i already cancelled last month, why am i seeing another charge, refund it",
+      "gold": "refund",
+      "pred": "refund",
+      "ok": true
+    },
+    {
+      "message": "someone changed my password and i'm now locked out completely",
+      "gold": "security",
+      "pred": "account",
+      "ok": false
+    }
+  ]
+}

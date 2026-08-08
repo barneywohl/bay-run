@@ -1,0 +1,87 @@
+{
+  "query": "embed short user messages to route them to the right intent",
+  "kind": "embedding",
+  "count": 6,
+  "candidates": [
+    {
+      "model": "thenlper/gte-large",
+      "type": "embedding",
+      "task": "sentence-similarity",
+      "params_b": null,
+      "size_mb": 5111.7,
+      "quant": null,
+      "context_length": null,
+      "downloads": 589598,
+      "license": "mit",
+      "verified_runs": 0,
+      "mirrored": true
+    },
+    {
+      "model": "thenlper/gte-base",
+      "type": "embedding",
+      "task": "sentence-similarity",
+      "params_b": null,
+      "size_mb": 1669.2,
+      "quant": null,
+      "context_length": null,
+      "downloads": 431356,
+      "license": "mit",
+      "verified_runs": 0,
+      "mirrored": true
+    },
+    {
+      "model": "thenlper/gte-small",
+      "type": "embedding",
+      "task": "sentence-similarity",
+      "params_b": null,
+      "size_mb": 765.7,
+      "quant": null,
+      "context_length": null,
+      "downloads": 321766,
+      "license": "mit",
+      "verified_runs": 0,
+      "mirrored": true
+    },
+    {
+      "model": "deepvk/USER-base",
+      "type": "embedding",
+      "task": "sentence-similarity",
+      "params_b": null,
+      "size_mb": 0.0,
+      "quant": null,
+      "context_length": null,
+      "downloads": 112861,
+      "license": "apache-2.0",
+      "verified_runs": 0,
+      "mirrored": true
+    },
+    {
+      "model": "algolia/algolia-large-en-generic-v2410",
+      "type": "embedding",
+      "task": "sentence-similarity",
+      "params_b": null,
+      "size_mb": 0.0,
+      "quant": null,
+      "context_length": null,
+      "downloads": 34,
+      "license": "mit",
+      "verified_runs": 0,
+      "mirrored": true
+    },
+    {
+      "model": "BAAI/bge-small-en-v1.5",
+      "type": "embedding",
+      "task": "feature-extraction",
+      "params_b": null,
+      "size_mb": 382.5,
+      "quant": null,
+      "context_length": null,
+      "downloads": 61393640,
+      "license": "mit",
+      "verified_runs": 0,
+      "mirrored": true
+    }
+  ],
+  "note": "Candidates only \u2014 ranked by mirrored-first then downloads. These are NOT proven good for your task; that's the point of the next step.",
+  "next": "POST /v1/eval with these `model` ids + your own labeled {query,positive,negatives} set to pick the winner on YOUR data, then serve it via /v1/embeddings or /v1/rerank."
+}

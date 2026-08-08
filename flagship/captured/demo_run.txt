@@ -1,0 +1,82 @@
+Bay Run @ https://bay-run-mvp-zfmlsu2yla-uc.a.run.app
+Intents: 10   Example utterances: 50   Held-out test messages: 24
+
+==========================================================================
+1. DISCOVER  — task -> candidate intent-routing embedders
+==========================================================================
+(1348 ms)  6 candidates from the 147K-model catalog:
+  - thenlper/gte-large                                         downloads=   589598  mirrored=True
+  - thenlper/gte-base                                          downloads=   431356  mirrored=True
+  - thenlper/gte-small                                         downloads=   321766  mirrored=True
+  - deepvk/USER-base                                           downloads=   112861  mirrored=True
+  - algolia/algolia-large-en-generic-v2410                     downloads=       34  mirrored=True
+  - BAAI/bge-small-en-v1.5                                     downloads= 61393640  mirrored=True
+
+  Download counts are popularity, NOT proof it routes YOUR intents. That is
+  what eval is for. (Config: the winner is proven below, not guessed here.)
+
+==========================================================================
+2. EVAL  — bake off candidates on YOUR labeled intents
+==========================================================================
+Candidates: 4   Ranking queries: 50
+Running bake-off (first run cold-loads each model from the mirror; be patient)...
+
+(bake-off wall time: 63.1s)   primary metric: MRR
+model                                                       MRR   nDCG@5  verified
+------------------------------------------------------------------------------------
+thenlper/gte-small                                        0.912    0.934      True
+sentence-transformers/all-MiniLM-L6-v2                    0.877    0.908      True
+BAAI/bge-small-en-v1.5                                    0.875    0.907      True
+sentence-transformers/average_word_embeddings_glove.6B.300d  0.795    0.847     False
+
+>>> WINNER on YOUR intents: thenlper/gte-small
+
+==========================================================================
+3. SERVE  — centroids from the winner, route UNSEEN messages live
+==========================================================================
+Embedded 50 example utterances into 10 centroids in 2121 ms.
+  [ok ] hey my card got declined but you still show my plan as a -> billing      (gold billing)
+  [ok ] can you send me the receipt for the august payment       -> billing      (gold billing)
+  [ok ] everything white-screens right after the latest release, -> tech_support (gold tech_support)
+  [ok ] the export button throws an error code and does nothing  -> tech_support (gold tech_support)
+  [ok ] please stop billing me, i'm done with the service        -> cancel       (gold cancel)
+  [ok ] how do i switch off the automatic renewal before friday  -> cancel       (gold cancel)
+  [ok ] interested in rolling this out to 300 people, do you do  -> sales        (gold sales)
+  [ok ] what's the difference between the team and business tier -> sales        (gold sales)
+  [ok ] i was billed for a year i never used, i want it back     -> refund       (gold refund)
+  [ok ] can i be reimbursed for the downtime last week           -> refund       (gold refund)
+  [ok ] which header do i pass the bearer token in for the api   -> docs         (gold docs)
+  [ok ] do you have an example of calling the endpoint from node -> docs         (gold docs)
+  [ok ] i'm sick of the runaround, put me through to a superviso -> escalate     (gold escalate)
+  [ok ] this is my last try before i dispute the charge, get me  -> escalate     (gold escalate)
+  [ok ] the reset email won't show up and i still can't sign in  -> account      (gold account)
+  [ok ] i need to point my login to a new work address           -> account      (gold account)
+  [ok ] there's a sign-in from a device in another state that wa -> security     (gold security)
+  [ok ] how do i set up 2fa so this doesn't happen again         -> security     (gold security)
+  [ok ] any chance you'll ship a native ipad app someday         -> feedback     (gold feedback)
+  [ok ] small request: let us reorder columns in the table view  -> feedback     (gold feedback)
+  [ok ] my invoice total doesn't match what your pricing page sa -> billing      (gold billing)
+  [ok ] the mobile client freezes on the loading spinner forever -> tech_support (gold tech_support)
+  [ok ] i already cancelled last month, why am i seeing another  -> refund       (gold refund)
+  [MISS] someone changed my password and i'm now locked out compl -> account      (gold security)
+
+Probing warm per-message serving latency (single-message calls)...
+Routing accuracy on 24 UNSEEN messages: 23/24 = 95.8%
+Warm per-message latency (round-trip incl. network): median 143 ms, p95 152 ms
+
+==========================================================================
+4. COMPARE  — cost at 1,000,000 routing requests / month
+==========================================================================
+approach                                              $ / 1M req
+----------------------------------------------------------------
+GPT-4o-mini  (LLM intent classification)                  57.30
+OpenAI text-embedding-3-small  (embed only)                0.40
+Bay Run winner: gte-small (CPU)                            4.16
+----------------------------------------------------------------
+Bay Run intent-routing is ~14x cheaper than a GPT-4o-mini intent call,
+at 143 ms warm latency, 96% accuracy on unseen messages, open weights, no lock-in.
+
+No paid API was called; frontier numbers are computed from published pricing.
+The Bay Run scorecard, accuracy, and latency above are all real.
+
+Wrote captured artifacts -> /private/tmp/bay-run/flagship/captured/  (discover.json, eval_scorecard.json, summary.json)
