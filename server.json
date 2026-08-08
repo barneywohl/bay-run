@@ -1,0 +1,8 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.barneywohl/bay-run",
+  "description": "Discover, evaluate, and serve task-specialist models (embeddings, rerank, extraction) — OpenAI-compatible + MCP-native.",
+  "repository": { "url": "https://github.com/barneywohl/bay-run", "source": "github" },
+  "version": "1.0.0",
+  "remotes": [ { "type": "streamable-http", "url": "https://bay-run-mvp-zfmlsu2yla-uc.a.run.app/mcp/" } ]
+}
