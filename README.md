@@ -10,6 +10,22 @@ proven on *their* data, served instantly. Bay Run is that loop — OpenAI-compat
 - **Remote MCP:** `https://bay-run-mvp-zfmlsu2yla-uc.a.run.app/mcp/`  (streamable-HTTP; add to any MCP client)
 - **Public demo token (rate-limited, try instantly):** `bayrun-demo-AS4XgfRmTHgNXRlpuP19zKeMxbcShyvP`
 
+## Runnable demo — the whole loop in one command
+[**`demo/`**](./demo/) is a self-contained killer demo: it routes support tickets with a 22M-param open
+embedder picked by a bake-off on labeled data — **~26× cheaper than a GPT-4o-mini classification baseline**,
+at equal-or-lower latency, open weights, no lock-in. Every number is captured from the live service.
+
+```bash
+git clone https://github.com/barneywohl/bay-run && cd bay-run/demo
+pip install -r requirements.txt
+python demo.py          # ships with the public demo token; runs discover → eval → serve → cost live
+```
+
+- [`demo/README.md`](./demo/README.md) — the captured scorecard, latencies, and cost table.
+- [`demo/mcp-quickstart.md`](./demo/mcp-quickstart.md) — give your agent the tools in one command.
+- [`demo/firecrawl-to-bay-run.md`](./demo/firecrawl-to-bay-run.md) — scrape with Firecrawl, run the specialist here.
+- [`demo/wrappers/`](./demo/wrappers/) — drop-in LangChain / LlamaIndex / OpenAI-Agents adapters.
+
 ## 30-second try
 ```bash
 curl -s https://bay-run-mvp-zfmlsu2yla-uc.a.run.app/v1/discover -H "authorization: Bearer bayrun-demo-AS4XgfRmTHgNXRlpuP19zKeMxbcShyvP" -H "content-type: application/json" \

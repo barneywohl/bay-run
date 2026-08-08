@@ -1,0 +1,15 @@
+{
+  "_comment": "Your labeled bake-off set: {query, positive, negatives}. 'query' = a real customer message. 'positive' = the correct routing label. 'negatives' = plausible wrong labels. Swap this file for YOUR tickets + YOUR taxonomy — that's the whole point: the winner is picked on YOUR data, not a public leaderboard.",
+  "task": "embedding",
+  "k": 3,
+  "dataset": [
+    {"query": "cant log in anymore keeps saying password wrong even tho i didnt change it", "positive": "Account: password reset and login help", "negatives": ["Billing: charged after I cancelled", "Bug: login page returns a 500 server error", "Security: someone else logged into my account"]},
+    {"query": "someone from another country signed into my account last night", "positive": "Security: unauthorized access / account compromise", "negatives": ["Account: password reset and login help", "Bug: login page returns a 500 server error", "Billing: unexpected charge on my card"]},
+    {"query": "i cancelled last week but you still took money out today", "positive": "Billing: charged after cancellation", "negatives": ["Billing: request a refund for duplicate charge", "Account: how to cancel my subscription", "Billing: update the card on file"]},
+    {"query": "the login button just spins forever and then shows an error code 500", "positive": "Bug: login page returns a 500 server error", "negatives": ["Account: password reset and login help", "Security: unauthorized access to my account", "Bug: dashboard charts fail to render"]},
+    {"query": "how do I download an invoice for my accountant for last quarter", "positive": "Billing: access invoices and receipts", "negatives": ["Billing: request a refund for duplicate charge", "Billing: update the card on file", "Account: manage teammates and seats"]},
+    {"query": "we are evaluating your tool for our whole department, need SSO and a security review", "positive": "Sales: enterprise security review and SSO", "negatives": ["Security: unauthorized access to my account", "Account: manage teammates and seats", "Sales: request a basic pricing quote"]},
+    {"query": "the numbers in the exported spreadsheet dont match what i see on screen", "positive": "Bug: export data mismatch with dashboard", "negatives": ["Bug: export produces an empty file", "Bug: dashboard charts fail to render", "Account: manage teammates and seats"]},
+    {"query": "can you delete all my data, I am exercising my GDPR right to be forgotten", "positive": "Privacy: GDPR data deletion request", "negatives": ["Account: how to cancel my subscription", "Security: unauthorized access to my account", "Billing: charged after cancellation"]}
+  ]
+}

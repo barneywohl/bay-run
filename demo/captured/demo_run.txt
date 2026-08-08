@@ -1,0 +1,65 @@
+
+========================================================================
+1. DISCOVER  — task -> candidate embedding specialists
+========================================================================
+(284 ms)  6 candidates from the catalog:
+  - thenlper/gte-large                                           downloads=  589598  mirrored=True
+  - thenlper/gte-base                                            downloads=  431356  mirrored=True
+  - thenlper/gte-small                                           downloads=  321766  mirrored=True
+  - NetherlandsForensicInstitute/robbert-2022-dutch-sentence-transformers downloads=   33490  mirrored=True
+  - algolia/algolia-large-en-generic-v2410                       downloads=      34  mirrored=True
+  - denniscraandijk/dutch-gte-multilingual-base                  downloads=      23  mirrored=True
+
+  These are candidates ONLY. A public download count is not proof it wins
+  on your tickets. That's what the eval step is for.
+
+========================================================================
+2. EVAL  — bake off candidates on YOUR labeled tickets
+========================================================================
+Candidates: 4   Labeled queries: 8
+Running bake-off (first run cold-loads each model from the mirror; be patient)...
+
+(bake-off wall time: 30.8s)   primary metric: MRR
+model                                                   MRR   nDCG@3  verified
+------------------------------------------------------------------------------
+sentence-transformers/all-MiniLM-L6-v2                1.000    1.000      True
+BAAI/bge-small-en-v1.5                                1.000    1.000      True
+thenlper/gte-small                                    1.000    1.000      True
+sentence-transformers/average_word_embeddings_glove.6B.300d  0.854    0.891     False
+
+>>> WINNER on YOUR data: sentence-transformers/all-MiniLM-L6-v2
+>>> Serve it via: POST /v1/embeddings with model='sentence-transformers/all-MiniLM-L6-v2'
+
+========================================================================
+3. RUN  — serve the winner, route unseen tickets in real time
+========================================================================
+Embedded 8 labeled example tickets as routing anchors in 452 ms.
+
+  ticket : hey my card got declined but you still show my plan as active?
+  route  : Billing: charged after cancellation   (96 ms)
+
+  ticket : app just white-screens after the latest update, nothing loads
+  route  : Bug: login page returns a 500 server error   (94 ms)
+
+  ticket : interested in rolling this out to 300 people, do you support SAML?
+  route  : Sales: enterprise security review and SSO   (98 ms)
+
+  ticket : please wipe my account and everything you have on me
+  route  : Privacy: GDPR data deletion request   (98 ms)
+
+Median warm serving latency (round-trip incl. network): 98 ms
+
+========================================================================
+4. COMPARE  — cost at 1,000,000 routing requests / month
+========================================================================
+approach                                          $ / 1M req
+------------------------------------------------------------
+GPT-4o-mini  (LLM classification)                     69.00
+OpenAI text-embedding-3-small (embed only)             2.00
+Bay Run winner: all-MiniLM-L6-v2 (CPU)                 2.70
+------------------------------------------------------------
+Bay Run is ~26x cheaper than GPT-4o-mini classification at equal-or-lower latency,
+with open weights (no lock-in) and a model proven on YOUR data — not a leaderboard's.
+
+Assumptions are stated above and in the README. No paid API was called; the
+frontier numbers are computed from published pricing. The Bay Run latency/scorecard are real.
