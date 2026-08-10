@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.barneywohl/bay-run",
   "title": "Bay Run",
-  "description": "Discover, prove & serve small open specialist models: embeddings, rerank, classify (guardrail/moderation/sentiment/NLI zero-shot), extract — OpenAI-compat.",
+  "description": "Discover, prove, route, and serve small AI specialists with fast RAG and private agent memory.",
   "version": "1.1.0",
   "websiteUrl": "https://huggingbay.xyz",
   "repository": {
@@ -12,11 +12,11 @@
   "remotes": [
     {
       "type": "streamable-http",
-      "url": "https://bay-run-mvp-zfmlsu2yla-uc.a.run.app/mcp/",
+      "url": "https://bay-run-mvp-889989800693.us-central1.run.app/mcp/",
       "headers": [
         {
           "name": "Authorization",
-          "description": "Bearer token for Bay Run. Format: 'Bearer <BAY_RUN_TOKEN>'. Mint a token at https://huggingbay.xyz/tokens. A public rate-limited demo token is in the repo README. A 401 carries a WWW-Authenticate challenge + a Link: rel=token-mint header.",
+          "description": "OAuth 2.1 bearer. Autonomous clients POST {\"grant_type\":\"client_credentials\"} to https://bay-run-mvp-889989800693.us-central1.run.app/oauth/token with no client secret or browser, then send Authorization: Bearer <token>. Persist the refresh token to retain the same private memory principal. RFC 9728 discovery: /.well-known/oauth-protected-resource.",
           "isRequired": true,
           "isSecret": true
         }
@@ -34,11 +34,23 @@
         "embed",
         "rerank",
         "classify",
-        "extract"
+        "extract",
+        "summarize",
+        "rag_search",
+        "memory_context",
+        "speed_test",
+        "remember",
+        "recall",
+        "forget",
+        "calculate",
+        "validate_json",
+        "resolve_link"
       ],
-      "openai_compatible_base_url": "https://bay-run-mvp-zfmlsu2yla-uc.a.run.app/v1",
-      "server_card_url": "https://bay-run-mvp-zfmlsu2yla-uc.a.run.app/.well-known/mcp/server-card.json",
-      "llms_txt_url": "https://bay-run-mvp-zfmlsu2yla-uc.a.run.app/llms.txt",
+      "openai_compatible_base_url": "https://bay-run-mvp-889989800693.us-central1.run.app/v1",
+      "server_card_url": "https://bay-run-mvp-889989800693.us-central1.run.app/.well-known/mcp/server-card.json",
+      "llms_txt_url": "https://bay-run-mvp-889989800693.us-central1.run.app/llms.txt",
+      "oauth_protected_resource_url": "https://bay-run-mvp-889989800693.us-central1.run.app/.well-known/oauth-protected-resource",
+      "oauth_token_url": "https://bay-run-mvp-889989800693.us-central1.run.app/oauth/token",
       "categories": ["ai-and-machine-learning", "developer-tools", "search"],
       "keywords": [
         "embeddings",

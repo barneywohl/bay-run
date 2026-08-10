@@ -1,24 +1,22 @@
 # Bay Run MCP — make your agent discover → eval → serve specialists, autonomously
 
-Give any MCP agent (Claude Desktop, Claude Code, Cursor, your own) all 7 tools:
-`find_specialist_for_task`, `route`, `discover_models`, `eval_models`, `embed`, `rerank`,
-`extract`. The agent can then find the right open specialist for a narrow task, prove it on
-your labeled data, and serve it — without you wiring any of it by hand. (`route` skips the
-labeled-data step: it picks a specialist per-request at inference time; `extract` turns messy
-HTML/text into schema-guided JSON.)
+Give any MCP agent (Claude Desktop, Claude Code, Cursor, your own) the live 20-tool surface:
+discover, evaluate, route, serve, classify, extract, summarize, RAG, speed-test, private durable
+memory, math, JSON validation, and dead-link resolution. Use `find_specialist_for_task` when you
+have labeled examples and `route` or `model="auto"` when you need the fastest warm specialist now.
 
-The live service is authenticated, so the MCP server has to forward your bearer token. Use the
-auth-enabled server in this folder: [`mcp/bay_run_mcp.py`](./mcp/bay_run_mcp.py).
+The remote MCP is `https://bay-run-mvp-889989800693.us-central1.run.app/mcp/`. Discovery and
+`try_bay_run` are public. Protected calls use OAuth 2.1; autonomous clients can self-mint a bounded
+credential with `client_credentials`, no client secret or browser.
 
 ## Install (one command)
 
 ```bash
-pip install "mcp[cli]" httpx
-
-claude mcp add bay-run \
-  --env BAY_RUN_BASE_URL=https://bay-run-mvp-zfmlsu2yla-uc.a.run.app \
-  --env BAY_RUN_TOKEN=<your token> \
-  -- python /absolute/path/to/mcp/bay_run_mcp.py
+BASE=https://bay-run-mvp-889989800693.us-central1.run.app
+TOKEN=$(curl -fsS "$BASE/oauth/token" -H 'content-type: application/json' \
+  -d '{"grant_type":"client_credentials"}' | python -c 'import json,sys; print(json.load(sys.stdin)["access_token"])')
+claude mcp add --transport http bay-run "$BASE/mcp/" \
+  --header "Authorization: Bearer $TOKEN"
 ```
 
 ### Claude Desktop (config JSON)
@@ -29,11 +27,10 @@ claude mcp add bay-run \
 {
   "mcpServers": {
     "bay-run": {
-      "command": "python",
-      "args": ["/absolute/path/to/mcp/bay_run_mcp.py"],
-      "env": {
-        "BAY_RUN_BASE_URL": "https://bay-run-mvp-zfmlsu2yla-uc.a.run.app",
-        "BAY_RUN_TOKEN": "<your token>"
+      "type": "streamable-http",
+      "url": "https://bay-run-mvp-889989800693.us-central1.run.app/mcp/",
+      "headers": {
+        "Authorization": "Bearer <short-lived OAuth access token>"
       }
     }
   }
@@ -58,9 +55,9 @@ a ranked scorecard (MRR / nDCG), a named winner, and live embeddings — the sam
 
 ## Notes
 
-- **The shipped stub has no auth.** The original `run-mvp/mcp/mcp_server.py` proxies to a *local*
-  Bay Run with no token. `mcp/bay_run_mcp.py` here adds the `Authorization: Bearer` header so it
-  works against the deployed service. That's the only difference.
+- **Prefer the remote MCP.** `mcp/bay_run_mcp.py` is a compatibility connector for older stdio-only
+  clients and exposes the original 9-tool subset. It self-mints OAuth when no token is configured.
 - **Cold start.** The first `eval_models`/`embed` call cold-loads models from the mirror (tens of
   seconds); warm calls are ~100 ms. Give the agent a generous tool timeout for the first eval.
-- **Never commit your token.** Keep `BAY_RUN_TOKEN` in the client's env/secrets, not in a checked-in file.
+- **Persist refresh credentials securely.** OAuth refresh preserves the agent's private memory identity;
+  never commit access or refresh credentials.

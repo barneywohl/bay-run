@@ -6,9 +6,10 @@ proven on *their* data, served instantly. Bay Run is that loop — OpenAI-compat
 
 > **discover → eval → serve**  (over a catalog of 147K models, mirrored-first)
 
-- **Live:** `https://bay-run-mvp-zfmlsu2yla-uc.a.run.app`
-- **Remote MCP:** `https://bay-run-mvp-zfmlsu2yla-uc.a.run.app/mcp/`  (streamable-HTTP; add to any MCP client)
-- **Public demo token (rate-limited, try instantly):** `bayrun-demo-AS4XgfRmTHgNXRlpuP19zKeMxbcShyvP`
+- **Live:** `https://bay-run-mvp-889989800693.us-central1.run.app`
+- **Remote MCP:** `https://bay-run-mvp-889989800693.us-central1.run.app/mcp/`  (streamable-HTTP; add to any MCP client)
+- **Autonomous OAuth:** `POST /oauth/token` with `{"grant_type":"client_credentials"}`; no client secret or browser
+- **Agent discovery:** `/.well-known/mcp/server-card.json`, `/llms.txt`, and `/.well-known/oauth-protected-resource`
 
 ## ⭐ Flagship showcase — the Semantic Intent-Router
 [**`flagship/`**](./flagship/) is the headline proof of the thesis. Every agent framework routes each
@@ -33,7 +34,7 @@ at equal-or-lower latency, open weights, no lock-in. Every number is captured fr
 ```bash
 git clone https://github.com/barneywohl/bay-run && cd bay-run/demo
 pip install -r requirements.txt
-python demo.py          # ships with the public demo token; runs discover → eval → serve → cost live
+python demo.py          # self-mints short-lived OAuth; runs discover → eval → serve → cost live
 ```
 
 - [`demo/README.md`](./demo/README.md) — the captured scorecard, latencies, and cost table.
@@ -43,20 +44,29 @@ python demo.py          # ships with the public demo token; runs discover → ev
 
 ## 30-second try
 ```bash
-curl -s https://bay-run-mvp-zfmlsu2yla-uc.a.run.app/v1/discover -H "authorization: Bearer bayrun-demo-AS4XgfRmTHgNXRlpuP19zKeMxbcShyvP" -H "content-type: application/json" \
+BASE=https://bay-run-mvp-889989800693.us-central1.run.app
+TOKEN=$(curl -fsS "$BASE/oauth/token" -H 'content-type: application/json' \
+  -d '{"grant_type":"client_credentials"}' | python -c 'import json,sys; print(json.load(sys.stdin)["access_token"])')
+curl -s "$BASE/v1/discover" -H "authorization: Bearer $TOKEN" -H "content-type: application/json" \
   -d '{"query":"multilingual sentence embeddings","kind":"embedding","limit":5}'
 ```
 
 ## Point any OpenAI client at it
 ```python
+import requests
 from openai import OpenAI
-client = OpenAI(base_url="https://bay-run-mvp-zfmlsu2yla-uc.a.run.app/v1", api_key="bayrun-demo-AS4XgfRmTHgNXRlpuP19zKeMxbcShyvP")
+
+base = "https://bay-run-mvp-889989800693.us-central1.run.app"
+token = requests.post(f"{base}/oauth/token", json={"grant_type": "client_credentials"}).json()["access_token"]
+client = OpenAI(base_url=f"{base}/v1", api_key=token)
 client.embeddings.create(model="BAAI/bge-small-en-v1.5", input=["hello"])
 ```
 
 ## MCP (agent-callable)
-Add the remote server `https://bay-run-mvp-zfmlsu2yla-uc.a.run.app/mcp/` to your MCP client (Bearer auth). 9 tools:
-`find_specialist_for_task` (discover→eval→serve on your labeled data), `request_specialist` (serve-or-capture — returns a serve pointer if a specialist exists, else records your demand), `route` (runtime auto-router — no examples, picks a specialist per-request), `discover_models`, `eval_models`, `embed`, `rerank`, `classify` (guardrail/moderation/sentiment/intent, or zero-shot via candidate_labels + an NLI model), `extract` (HTML/text → schema-guided JSON).
+Add the remote server `https://bay-run-mvp-889989800693.us-central1.run.app/mcp/` to your MCP client. It exposes 20 tools:
+`try_bay_run`, `find_specialist_for_task`, `request_specialist`, `route`, `discover_models`, `eval_models`, `embed`, `rerank`, `classify`, `extract`, `summarize`, `rag_search`, `memory_context`, `speed_test`, `remember`, `recall`, `forget`, `calculate`, `validate_json`, and `resolve_link`.
+
+MCP discovery and `try_bay_run` are public. Other calls use OAuth bearer auth. Persist the OAuth refresh token so the same private memory principal follows the agent across renewals and harnesses.
 
 Served from a content-addressed, quarantine-gated mirror. Neutral — it helps you pick the
 model that wins on *your* data, not sell you one. Backend is closed; this repo is the

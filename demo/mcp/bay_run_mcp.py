@@ -1,36 +1,38 @@
 """
 Bay Run MCP server (auth-enabled) — point any MCP agent at the LIVE Bay Run service.
 
-Exposes all 9 tools so an agent can run the whole loop autonomously:
+Exposes the original 9-tool connector surface. Prefer the live remote MCP for all 20 tools:
     find_specialist_for_task · request_specialist · route · discover_models · eval_models ·
     embed · rerank · classify · extract
 
 This mirrors the tool surface of the LIVE remote MCP endpoint
-(https://bay-run-mvp-zfmlsu2yla-uc.a.run.app/mcp/); use this stdio wrapper when you want a
+(https://bay-run-mvp-889989800693.us-central1.run.app/mcp/); use this stdio wrapper when you want a
 local process instead of a remote connection. It forwards your bearer token to the service.
 
 Requires:  pip install "mcp[cli]" httpx
 Env:       BAY_RUN_BASE_URL   (default: the live service)
-           BAY_RUN_TOKEN      (defaults to the public rate-limited demo token so it runs
-                               copy-paste; export your own for real volume)
+           BAY_RUN_TOKEN      (optional; otherwise self-mints bounded OAuth client_credentials)
 Run:       python bay_run_mcp.py         # stdio transport
 """
 import os
 import httpx
 from mcp.server.fastmcp import FastMCP
 
-BASE = os.environ.get("BAY_RUN_BASE_URL", "https://bay-run-mvp-zfmlsu2yla-uc.a.run.app")
-# Public, rate-limited demo token so this runs copy-paste. Override with BAY_RUN_TOKEN.
-DEMO_TOKEN = "bayrun-demo-AS4XgfRmTHgNXRlpuP19zKeMxbcShyvP"
-TOKEN = os.environ.get("BAY_RUN_TOKEN", DEMO_TOKEN)
-HEADERS = {"authorization": f"Bearer {TOKEN}"} if TOKEN else {}
+BASE = os.environ.get("BAY_RUN_BASE_URL", "https://bay-run-mvp-889989800693.us-central1.run.app")
+TOKEN = os.environ.get("BAY_RUN_TOKEN")
 
 mcp = FastMCP("bay-run")
 
 
 def _post(path: str, payload: dict, timeout: int) -> dict:
-    with httpx.Client(timeout=timeout, headers=HEADERS) as client:
-        resp = client.post(f"{BASE}{path}", json=payload)
+    global TOKEN
+    with httpx.Client(timeout=timeout) as client:
+        if not TOKEN:
+            response = client.post(f"{BASE}/oauth/token", json={"grant_type": "client_credentials"})
+            response.raise_for_status()
+            TOKEN = response.json()["access_token"]
+        headers = {"authorization": f"Bearer {TOKEN}"}
+        resp = client.post(f"{BASE}{path}", headers=headers, json=payload)
         resp.raise_for_status()
         return resp.json()
 

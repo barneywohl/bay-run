@@ -17,7 +17,7 @@ The full loop, live against the deployed service:
                    nearest-intent-centroid; report real routing accuracy + latency
     4. compare   — cost vs a frontier-LLM intent call at published pricing (computed)
 
-Run (one command; ships with the public demo token):
+Run (one command; self-mints a short-lived OAuth credential):
     pip install -r requirements.txt
     python router_demo.py
 Override the token / base if you like:
@@ -38,13 +38,17 @@ from pathlib import Path
 
 import requests
 
-BASE = os.environ.get("BAY_RUN_BASE_URL", "https://bay-run-mvp-zfmlsu2yla-uc.a.run.app")
+BASE = os.environ.get("BAY_RUN_BASE_URL", "https://bay-run-mvp-889989800693.us-central1.run.app")
 
-# Public, rate-limited demo token — intentionally shipped so you can run this in one
-# command. Low-limit on purpose; mint your own at https://huggingbay.xyz/tokens and
-# override with:  export BAY_RUN_TOKEN=<your token>
-PUBLIC_DEMO_TOKEN = "bayrun-demo-AS4XgfRmTHgNXRlpuP19zKeMxbcShyvP"
-TOKEN = os.environ.get("BAY_RUN_TOKEN", PUBLIC_DEMO_TOKEN)
+TOKEN = os.environ.get("BAY_RUN_TOKEN")
+if not TOKEN:
+    oauth = requests.post(
+        f"{BASE}/oauth/token",
+        json={"grant_type": "client_credentials"},
+        timeout=30,
+    )
+    oauth.raise_for_status()
+    TOKEN = oauth.json()["access_token"]
 
 H = {"authorization": f"Bearer {TOKEN}", "content-type": "application/json"}
 HERE = Path(__file__).parent
@@ -63,8 +67,7 @@ CANDIDATES = [
 
 
 _last_call = [0.0]
-# The public demo token is capped at 20 requests/minute/IP. Pace client-side to ~18/min
-# so the demo runs clean on the shared token; mint your own for higher limits.
+# OAuth client_credentials tokens use the bounded demo tier. Pace client-side to ~18/min.
 MIN_INTERVAL = float(os.environ.get("BAY_RUN_MIN_INTERVAL", "3.3"))
 
 
@@ -78,7 +81,7 @@ def call(path: str, payload: dict, timeout: int = 240, throttle: bool = True):
         r = requests.post(f"{BASE}{path}", headers=H, json=payload, timeout=timeout)
         dt = time.time() - t0
         _last_call[0] = time.time()
-        if r.status_code == 429:  # rate limited on the shared demo token — back off
+        if r.status_code == 429:  # bounded OAuth tier — back off
             back = float(r.headers.get("retry-after", 4 + attempt * 4))
             print(f"    (429 rate-limited; waiting {back:.0f}s and retrying...)")
             time.sleep(back)

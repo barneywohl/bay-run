@@ -14,7 +14,6 @@ Full loop, live against the deployed service:
 
 Run:
     pip install -r requirements.txt
-    export BAY_RUN_TOKEN=<your token>          # ask the operator; never commit this
     python demo.py
 
 Everything here hits the real service. The numbers you see are real.
@@ -23,22 +22,22 @@ from __future__ import annotations
 
 import json
 import os
-import sys
 import time
 from pathlib import Path
 
 import requests
 
-BASE = os.environ.get("BAY_RUN_BASE_URL", "https://bay-run-mvp-zfmlsu2yla-uc.a.run.app")
+BASE = os.environ.get("BAY_RUN_BASE_URL", "https://bay-run-mvp-889989800693.us-central1.run.app")
 
-# Public, rate-limited demo token — intentionally shipped so you can run this in one command.
-# It is low-limit on purpose; mint your own (higher limits) at https://huggingbay.xyz/tokens
-# and override with:  export BAY_RUN_TOKEN=<your token>
-PUBLIC_DEMO_TOKEN = "bayrun-demo-AS4XgfRmTHgNXRlpuP19zKeMxbcShyvP"
-TOKEN = os.environ.get("BAY_RUN_TOKEN", PUBLIC_DEMO_TOKEN)
-
+TOKEN = os.environ.get("BAY_RUN_TOKEN")
 if not TOKEN:
-    sys.exit("Set BAY_RUN_TOKEN in your environment first:  export BAY_RUN_TOKEN=<your token>")
+    oauth = requests.post(
+        f"{BASE}/oauth/token",
+        json={"grant_type": "client_credentials"},
+        timeout=30,
+    )
+    oauth.raise_for_status()
+    TOKEN = oauth.json()["access_token"]
 
 H = {"authorization": f"Bearer {TOKEN}", "content-type": "application/json"}
 HERE = Path(__file__).parent

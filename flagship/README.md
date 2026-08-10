@@ -18,11 +18,11 @@ Everything below is captured from the **live** service. Reproduce it in one comm
 ```bash
 git clone https://github.com/barneywohl/bay-run && cd bay-run/flagship
 pip install -r requirements.txt
-python router_demo.py          # ships with the public demo token; runs the whole loop live
+python router_demo.py          # self-mints bounded OAuth; runs the whole loop live
 ```
 
-The script (`router_demo.py`) is paced to the shared demo token's 20 req/min limit. Mint your
-own at https://huggingbay.xyz/tokens and `export BAY_RUN_TOKEN=...` for full speed.
+The script (`router_demo.py`) is paced for the bounded OAuth demo tier. Set `BAY_RUN_TOKEN`
+only when your harness already manages a credential.
 
 ## What the run proves (captured, live)
 
@@ -75,22 +75,25 @@ intents. 23/24 with zero per-intent tuning is the real number.
 
 Discover a routing embedder:
 ```bash
-curl -s https://bay-run-mvp-zfmlsu2yla-uc.a.run.app/v1/discover \
-  -H "authorization: Bearer bayrun-demo-AS4XgfRmTHgNXRlpuP19zKeMxbcShyvP" \
+BASE=https://bay-run-mvp-889989800693.us-central1.run.app
+TOKEN=$(curl -fsS "$BASE/oauth/token" -H 'content-type: application/json' \
+  -d '{"grant_type":"client_credentials"}' | python -c 'import json,sys; print(json.load(sys.stdin)["access_token"])')
+curl -s "$BASE/v1/discover" \
+  -H "authorization: Bearer $TOKEN" \
   -H "content-type: application/json" \
   -d '{"query":"embed short user messages to route them to the right intent","kind":"embedding","limit":5}'
 ```
 
 Serve the winner (OpenAI-compatible):
 ```bash
-curl -s https://bay-run-mvp-zfmlsu2yla-uc.a.run.app/v1/embeddings \
-  -H "authorization: Bearer bayrun-demo-AS4XgfRmTHgNXRlpuP19zKeMxbcShyvP" \
+curl -s "$BASE/v1/embeddings" \
+  -H "authorization: Bearer $TOKEN" \
   -H "content-type: application/json" \
   -d '{"model":"thenlper/gte-small","input":["please stop billing me, i'\''m done"]}'
 ```
 
-Or point any OpenAI client at `.../v1`, or add the MCP server `.../mcp/` to your agent
-(tools: `discover_models`, `eval_models`, `embed`, `rerank`, `extract`, `route`).
+Or point any OpenAI client at `.../v1`, or add the MCP server `.../mcp/` to your agent.
+The remote MCP publishes all 20 tools in its unauthenticated server card.
 
 ## Files
 

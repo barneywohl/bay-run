@@ -1,4 +1,4 @@
-Bay Run @ https://bay-run-mvp-zfmlsu2yla-uc.a.run.app
+Bay Run @ https://bay-run-mvp-889989800693.us-central1.run.app
 Intents: 10   Example utterances: 50   Held-out test messages: 24
 
 ==========================================================================

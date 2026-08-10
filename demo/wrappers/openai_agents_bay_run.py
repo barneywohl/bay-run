@@ -7,22 +7,24 @@ Two ways to use this file:
   (B) OpenAI Agents SDK @function_tool wrappers (pip install openai-agents).
 
 Both point at the LIVE Bay Run service. Descriptions are written for model
-tool-selection. Runs copy-paste with the baked-in public demo token below; for real
-volume export BAY_RUN_TOKEN=...  (mint one at https://huggingbay.xyz/tokens).
+tool-selection. Runs copy-paste with self-minted OAuth client_credentials; an explicit
+BAY_RUN_TOKEN remains supported.
 """
 import os
 import httpx
 
-BASE = os.environ.get("BAY_RUN_BASE_URL", "https://bay-run-mvp-zfmlsu2yla-uc.a.run.app")
-# Public, rate-limited demo token so this file runs copy-paste. Override with BAY_RUN_TOKEN.
-DEMO_TOKEN = "bayrun-demo-AS4XgfRmTHgNXRlpuP19zKeMxbcShyvP"
-HEADERS = {"Authorization": f"Bearer {os.environ.get('BAY_RUN_TOKEN', DEMO_TOKEN)}",
-           "Content-Type": "application/json"}
+BASE = os.environ.get("BAY_RUN_BASE_URL", "https://bay-run-mvp-889989800693.us-central1.run.app")
+TOKEN = os.environ.get("BAY_RUN_TOKEN")
 
 
 def _post(path: str, payload: dict, timeout: int = 120) -> dict:
+    global TOKEN
     with httpx.Client(timeout=timeout) as c:
-        r = c.post(f"{BASE}{path}", headers=HEADERS, json=payload)
+        if not TOKEN:
+            oauth = c.post(f"{BASE}/oauth/token", json={"grant_type": "client_credentials"})
+            oauth.raise_for_status()
+            TOKEN = oauth.json()["access_token"]
+        r = c.post(f"{BASE}{path}", headers={"Authorization": f"Bearer {TOKEN}"}, json=payload)
         r.raise_for_status()
         return r.json()
 

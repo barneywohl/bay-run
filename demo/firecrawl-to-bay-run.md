@@ -34,7 +34,7 @@ rows — and hand them to Bay Run.
 ## Step 2 — Bay Run embeds the chunks (build a retrieval index)
 
 ```bash
-BASE=https://bay-run-mvp-zfmlsu2yla-uc.a.run.app
+BASE=https://bay-run-mvp-889989800693.us-central1.run.app
 curl -s $BASE/v1/embeddings -H "authorization: Bearer <your token>" -H "content-type: application/json" \
   -d '{"model":"sentence-transformers/all-MiniLM-L6-v2",
        "input":["Team plan: $12/user/mo, up to 50 seats",

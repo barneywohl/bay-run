@@ -3,7 +3,7 @@
 **One narrow, high-volume job (support-ticket routing). One tiny open model, picked by a bake-off on
 *your* labeled data, served instantly from an OpenAI-compatible endpoint. No GPU, no packaging, no lock-in.**
 
-This folder is the whole thing. Clone it, set one env var, run one file. Every number below was
+This folder is the whole thing. Clone it and run one file. Every number below was
 captured from the **live** Bay Run service — the only thing that isn't a real API call is the frontier
 cost baseline, which is *computed* from published pricing (we don't spend your money to make a point).
 
@@ -17,13 +17,12 @@ discover  →  eval (bake-off on YOUR data)  →  run (serve the winner)  →  c
 
 ```bash
 pip install -r requirements.txt
-python demo.py                          # runs against the live service with the built-in public demo token
+python demo.py                          # self-mints a bounded OAuth credential
 ```
 
-- **Zero-config:** `demo.py` ships with a **public, rate-limited demo token** so it runs in one command.
-  It's low-limit on purpose — for real volume, mint your own at `https://huggingbay.xyz/tokens` and
-  `export BAY_RUN_TOKEN=<your token>` to override. Never commit a private token.
-- Base URL is baked in: `https://bay-run-mvp-zfmlsu2yla-uc.a.run.app` (override with `BAY_RUN_BASE_URL`).
+- **Zero-config:** `demo.py` uses OAuth `client_credentials` with no client secret or browser. Set
+  `BAY_RUN_TOKEN` only when a harness already manages credentials.
+- Base URL is baked in: `https://bay-run-mvp-889989800693.us-central1.run.app` (override with `BAY_RUN_BASE_URL`).
 - `dataset.json` is a **support-ticket routing** set of `{query, positive, negatives}`. Swap it for your
   own tickets + your own taxonomy — that's the point: the winner is chosen on *your* data.
 - First run is slow (the service is scale-to-zero and cold-loads each candidate from the mirror). Warm
@@ -114,7 +113,7 @@ Pricing sources (Aug 2026):
 - **This demo exercises retrieval/classification, not generative extraction.** It hand-runs the
   embeddings + rerank path. HTML→structured-JSON *generative* extraction is also LIVE now (the
   `extract` tool / `POST /v1/chat/completions`, model="auto" supported) — it's just not exercised
-  in this particular ticket-routing walkthrough. Bay Run exposes 7 MCP tools in total; see the repo README.
+  in this particular ticket-routing walkthrough. Bay Run exposes 20 MCP tools in total; see the repo README.
 - **The cost win is vs the naive LLM-classification pattern**, which is exactly what the target persona is
   overpaying for. Against a tuned embedding-API + self-hosted search you're competing on lock-in,
   neutrality, and the eval — not raw token price.
