@@ -3,7 +3,7 @@
   "name": "io.github.barneywohl/bay-run",
   "title": "Bay Run",
   "description": "Discover, prove, route, and serve small AI specialists with fast RAG and private agent memory.",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "websiteUrl": "https://huggingbay.xyz",
   "repository": {
     "url": "https://github.com/barneywohl/bay-run",
@@ -26,6 +26,7 @@
   "_meta": {
     "io.modelcontextprotocol.registry/publisher-provided": {
       "tools": [
+        "try_bay_run",
         "find_specialist_for_task",
         "request_specialist",
         "route",
