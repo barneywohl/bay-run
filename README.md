@@ -6,8 +6,8 @@ proven on *their* data, served instantly. Bay Run is that loop — OpenAI-compat
 
 > **discover → eval → serve**  (over a catalog of 147K models, mirrored-first)
 
-- **Live:** `https://bay-run-mvp-889989800693.us-central1.run.app`
-- **Remote MCP:** `https://bay-run-mvp-889989800693.us-central1.run.app/mcp/`  (streamable-HTTP; add to any MCP client)
+- **Live:** `https://run.huggingbay.xyz`
+- **Remote MCP:** `https://run.huggingbay.xyz/mcp/`  (streamable-HTTP; add to any MCP client)
 - **Autonomous OAuth:** `POST /oauth/token` with `{"grant_type":"client_credentials"}`; no client secret or browser
 - **Agent discovery:** `/.well-known/mcp/server-card.json`, `/llms.txt`, and `/.well-known/oauth-protected-resource`
 
@@ -44,7 +44,7 @@ python demo.py          # self-mints short-lived OAuth; runs discover → eval �
 
 ## 30-second try
 ```bash
-BASE=https://bay-run-mvp-889989800693.us-central1.run.app
+BASE=https://run.huggingbay.xyz
 TOKEN=$(curl -fsS "$BASE/oauth/token" -H 'content-type: application/json' \
   -d '{"grant_type":"client_credentials"}' | python -c 'import json,sys; print(json.load(sys.stdin)["access_token"])')
 curl -s "$BASE/v1/discover" -H "authorization: Bearer $TOKEN" -H "content-type: application/json" \
@@ -56,17 +56,38 @@ curl -s "$BASE/v1/discover" -H "authorization: Bearer $TOKEN" -H "content-type: 
 import requests
 from openai import OpenAI
 
-base = "https://bay-run-mvp-889989800693.us-central1.run.app"
+base = "https://run.huggingbay.xyz"
 token = requests.post(f"{base}/oauth/token", json={"grant_type": "client_credentials"}).json()["access_token"]
 client = OpenAI(base_url=f"{base}/v1", api_key=token)
 client.embeddings.create(model="BAAI/bge-small-en-v1.5", input=["hello"])
 ```
 
 ## MCP (agent-callable)
-Add the remote server `https://bay-run-mvp-889989800693.us-central1.run.app/mcp/` to your MCP client. It exposes 20 tools:
-`try_bay_run`, `find_specialist_for_task`, `request_specialist`, `route`, `discover_models`, `eval_models`, `embed`, `rerank`, `classify`, `extract`, `summarize`, `rag_search`, `memory_context`, `speed_test`, `remember`, `recall`, `forget`, `calculate`, `validate_json`, and `resolve_link`.
+Add the remote server `https://run.huggingbay.xyz/mcp/` to your MCP client. It exposes 21 tools:
+`try_bay_run`, `find_specialist_for_task`, `request_specialist`, `route`, `discover_models`, `eval_models`, `embed`, `rerank`, `classify`, `extract`, `summarize`, `rag_search`, `memory_context`, `speed_test`, `remember`, `recall`, `forget`, `calculate`, `validate_json`, `resolve_link`, and `parse_pdf`.
 
 MCP discovery and `try_bay_run` are public. Other calls use OAuth bearer auth. Persist the OAuth refresh token so the same private memory principal follows the agent across renewals and harnesses.
+
+After `tools/list`, the `try_bay_run` Tool `_meta["io.github.barneywohl/first-call"]`
+field contains this exact no-credential first request. The result is a fixed 6×7 activation proof
+with structured output; it is deliberately not counted as product-value usage.
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "bay-run-first-call",
+  "method": "tools/call",
+  "params": {"name": "try_bay_run", "arguments": {}}
+}
+```
+
+Agent harnesses and crawlers may truthfully self-declare with
+`X-Bay-Run-Client-Class`; a harness may also send an opaque, per-run
+`X-Bay-Run-Client-Session` hint. Bay Run HMACs and daily-rotates that hint instead of logging it.
+Synthetic smoke tests should send
+`X-Bay-Run-Traffic-Class: synthetic`; the response echoes that label, but the event remains in the
+audit stream. Bay Run treats client and traffic classes as untrusted hints, never lets a caller erase
+telemetry, and never infers a human from traffic.
 
 Served from a content-addressed, quarantine-gated mirror. Neutral — it helps you pick the
 model that wins on *your* data, not sell you one. Backend is closed; this repo is the

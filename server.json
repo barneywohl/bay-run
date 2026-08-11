@@ -3,7 +3,7 @@
   "name": "io.github.barneywohl/bay-run",
   "title": "Bay Run",
   "description": "Discover, prove, route, and serve small AI specialists with fast RAG and private agent memory.",
-  "version": "1.1.1",
+  "version": "1.4.1",
   "websiteUrl": "https://huggingbay.xyz",
   "repository": {
     "url": "https://github.com/barneywohl/bay-run",
@@ -12,12 +12,12 @@
   "remotes": [
     {
       "type": "streamable-http",
-      "url": "https://bay-run-mvp-889989800693.us-central1.run.app/mcp/",
+      "url": "https://run.huggingbay.xyz/mcp/",
       "headers": [
         {
           "name": "Authorization",
-          "description": "OAuth 2.1 bearer. Autonomous clients POST {\"grant_type\":\"client_credentials\"} to https://bay-run-mvp-889989800693.us-central1.run.app/oauth/token with no client secret or browser, then send Authorization: Bearer <token>. Persist the refresh token to retain the same private memory principal. RFC 9728 discovery: /.well-known/oauth-protected-resource.",
-          "isRequired": true,
+          "description": "Optional for initialize, tools/list, and the exact no-argument try_bay_run activation proof. Other tools/call requests use an OAuth 2.1 bearer. Autonomous clients POST {\"grant_type\":\"client_credentials\"} to https://run.huggingbay.xyz/oauth/token, then retry the original request with Authorization: Bearer <token>.",
+          "isRequired": false,
           "isSecret": true
         }
       ]
@@ -45,13 +45,46 @@
         "forget",
         "calculate",
         "validate_json",
-        "resolve_link"
+        "resolve_link",
+        "parse_pdf"
       ],
-      "openai_compatible_base_url": "https://bay-run-mvp-889989800693.us-central1.run.app/v1",
-      "server_card_url": "https://bay-run-mvp-889989800693.us-central1.run.app/.well-known/mcp/server-card.json",
-      "llms_txt_url": "https://bay-run-mvp-889989800693.us-central1.run.app/llms.txt",
-      "oauth_protected_resource_url": "https://bay-run-mvp-889989800693.us-central1.run.app/.well-known/oauth-protected-resource",
-      "oauth_token_url": "https://bay-run-mvp-889989800693.us-central1.run.app/oauth/token",
+      "io.github.barneywohl/first-call": {
+        "schema": "bay-run.first-call.v1",
+        "kind": "activation_proof",
+        "authRequired": false,
+        "transport": {
+          "url": "https://run.huggingbay.xyz/mcp/",
+          "contentType": "application/json",
+          "accept": "application/json, text/event-stream"
+        },
+        "request": {
+          "jsonrpc": "2.0",
+          "id": "bay-run-first-call",
+          "method": "tools/call",
+          "params": {"name": "try_bay_run", "arguments": {}}
+        },
+        "success": {
+          "isError": false,
+          "structuredContent": {
+            "schema": "bay-run.activation-trial.v1",
+            "ok": true,
+            "proof": {"result": 42}
+          }
+        },
+        "usageCredit": false
+      },
+      "telemetry": {
+        "optionalClientClassHeader": "X-Bay-Run-Client-Class",
+        "optionalClientSessionHeader": "X-Bay-Run-Client-Session",
+        "clientClasses": ["mcp_client", "agent_harness", "registry_crawler", "monitor", "human_via_agent", "script_or_cli", "other"],
+        "syntheticTrafficHeader": {"name": "X-Bay-Run-Traffic-Class", "value": "synthetic"},
+        "note": "Client and traffic classes are untrusted declarations; all events are retained and Bay Run never infers a human from traffic."
+      },
+      "openai_compatible_base_url": "https://run.huggingbay.xyz/v1",
+      "server_card_url": "https://run.huggingbay.xyz/.well-known/mcp/server-card.json",
+      "llms_txt_url": "https://run.huggingbay.xyz/llms.txt",
+      "oauth_protected_resource_url": "https://run.huggingbay.xyz/.well-known/oauth-protected-resource",
+      "oauth_token_url": "https://run.huggingbay.xyz/oauth/token",
       "categories": ["ai-and-machine-learning", "developer-tools", "search"],
       "keywords": [
         "embeddings",
