@@ -32,10 +32,10 @@ Install with `npm install ai @ai-sdk/openai-compatible`, then run as an ESM modu
 import { generateText } from "ai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 
-const token = process.env.BAYRUN_API_KEY ?? (await fetch("https://run.huggingbay.xyz/oauth/token", {
+const token = process.env.BAYRUN_API_KEY ?? await fetch("https://run.huggingbay.xyz/oauth/token", {
   method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" },
   body: "grant_type=client_credentials",
-})).then((response) => response.json()).then((body) => body.access_token);
+}).then((response) => response.json()).then((body) => body.access_token);
 const bayrun = createOpenAICompatible({ name: "bayrun", apiKey: token, baseURL: "https://run.huggingbay.xyz/v1" });
 const { text } = await generateText({ model: bayrun("auto"), prompt: "Reply with one word: hello" });
 console.log(text);
@@ -77,4 +77,11 @@ print(llm.complete("Reply with one word: hello"))
 
 ## Verification record
 
-The OpenAI Python base-URL flow was exercised in the same-day Bay Run quickstart transcript. The Vercel AI SDK, LangChain, and LlamaIndex snippets are syntax-reviewed against their official adapter APIs but could not be executed from this checkout because the current shell has no DNS/network access and those optional packages are not installed. They must be run against the live origin before this document is treated as complete or published.
+Executed against `https://run.huggingbay.xyz/v1` on 2026-08-17 from disposable Python and Node environments:
+
+- OpenAI Python: passed `chat.completions.create`.
+- Vercel AI SDK: passed `generateText` after minting the launch bearer.
+- LangChain: passed `ChatOpenAI.invoke`.
+- LlamaIndex: passed `OpenAILike.complete`.
+
+Each snippet minted its own form-encoded `client_credentials` bearer when `BAYRUN_API_KEY` was not set. No bearer values were printed or committed.
