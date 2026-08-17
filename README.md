@@ -67,6 +67,8 @@ const answer = await c.classify("A helpful result.");
 const stream = await c.chat([{ role: "user", content: "Say hello." }], { stream: true });
 ```
 
+Durable `remember`/`recall`/`forget` memory is owner-delegated and is not authorized for the shared demo bearer. Use a purpose-specific developer key or a client registered with `token_endpoint_auth_method=client_secret_post`.
+
 Adapter snippets for OpenAI Python, Vercel AI SDK, LangChain, and LlamaIndex are in [`docs/integrations.md`](docs/integrations.md).
 
 ## MCP: exactly three tools
