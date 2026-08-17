@@ -2,9 +2,9 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.barneywohl/bay-run",
   "title": "Bay Run",
-  "description": "Discover, prove, route, and serve small AI specialists with fast RAG and private agent memory.",
-  "version": "1.1.1",
-  "websiteUrl": "https://huggingbay.xyz",
+  "description": "Free-at-launch OpenAI-compatible inference with signed provenance receipts and three focused MCP tools.",
+  "version": "1.2.0",
+  "websiteUrl": "https://run.huggingbay.xyz",
   "repository": {
     "url": "https://github.com/barneywohl/bay-run",
     "source": "github"
@@ -12,11 +12,11 @@
   "remotes": [
     {
       "type": "streamable-http",
-      "url": "https://bay-run-mvp-889989800693.us-central1.run.app/mcp/",
+      "url": "https://run.huggingbay.xyz/mcp/",
       "headers": [
         {
           "name": "Authorization",
-          "description": "OAuth 2.1 bearer. Autonomous clients POST {\"grant_type\":\"client_credentials\"} to https://bay-run-mvp-889989800693.us-central1.run.app/oauth/token with no client secret or browser, then send Authorization: Bearer <token>. Persist the refresh token to retain the same private memory principal. RFC 9728 discovery: /.well-known/oauth-protected-resource.",
+          "description": "Mint the bounded launch bearer using the form-encoded client_credentials request shown at https://run.huggingbay.xyz/quickstart, then send Authorization: Bearer <token>.",
           "isRequired": true,
           "isSecret": true
         }
@@ -25,54 +25,15 @@
   ],
   "_meta": {
     "io.modelcontextprotocol.registry/publisher-provided": {
-      "tools": [
-        "try_bay_run",
-        "find_specialist_for_task",
-        "request_specialist",
-        "route",
-        "discover_models",
-        "eval_models",
-        "embed",
-        "rerank",
-        "classify",
-        "extract",
-        "summarize",
-        "rag_search",
-        "memory_context",
-        "speed_test",
-        "remember",
-        "recall",
-        "forget",
-        "calculate",
-        "validate_json",
-        "resolve_link"
-      ],
-      "openai_compatible_base_url": "https://bay-run-mvp-889989800693.us-central1.run.app/v1",
-      "server_card_url": "https://bay-run-mvp-889989800693.us-central1.run.app/.well-known/mcp/server-card.json",
-      "llms_txt_url": "https://bay-run-mvp-889989800693.us-central1.run.app/llms.txt",
-      "oauth_protected_resource_url": "https://bay-run-mvp-889989800693.us-central1.run.app/.well-known/oauth-protected-resource",
-      "oauth_token_url": "https://bay-run-mvp-889989800693.us-central1.run.app/oauth/token",
-      "categories": ["ai-and-machine-learning", "developer-tools", "search"],
-      "keywords": [
-        "embeddings",
-        "reranking",
-        "text-classification",
-        "guardrails",
-        "content-moderation",
-        "zero-shot-classification",
-        "sentiment-analysis",
-        "model-discovery",
-        "model-evaluation",
-        "runtime-routing",
-        "structured-extraction",
-        "specialist-models",
-        "sentence-transformers",
-        "cross-encoder",
-        "rag",
-        "openai-compatible",
-        "cpu-inference",
-        "huggingface"
-      ]
+      "tools": ["get_task_quote", "run_task", "verify_result"],
+      "openai_compatible_base_url": "https://run.huggingbay.xyz/v1",
+      "server_card_url": "https://run.huggingbay.xyz/.well-known/mcp/server-card.json",
+      "llms_txt_url": "https://run.huggingbay.xyz/llms.txt",
+      "oauth_protected_resource_url": "https://run.huggingbay.xyz/.well-known/oauth-protected-resource",
+      "oauth_token_url": "https://run.huggingbay.xyz/oauth/token",
+      "quickstart_url": "https://run.huggingbay.xyz/quickstart",
+      "categories": ["ai-and-machine-learning", "developer-tools", "agents"],
+      "keywords": ["mcp", "llm-router", "small-models", "inference", "agents", "openai-compatible", "provenance"]
     }
   }
 }
