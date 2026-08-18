@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.barneywohl/bay-run",
   "title": "Bay Run",
-  "description": "Free-at-launch OpenAI-compatible inference with signed provenance receipts and three focused MCP tools.",
+  "description": "Free OpenAI-compatible inference with signed provenance receipts and 3 focused MCP tools.",
   "version": "1.2.0",
   "websiteUrl": "https://run.huggingbay.xyz",
   "repository": {
@@ -25,15 +25,31 @@
   ],
   "_meta": {
     "io.modelcontextprotocol.registry/publisher-provided": {
-      "tools": ["get_task_quote", "run_task", "verify_result"],
+      "tools": [
+        "get_task_quote",
+        "run_task",
+        "verify_result"
+      ],
       "openai_compatible_base_url": "https://run.huggingbay.xyz/v1",
       "server_card_url": "https://run.huggingbay.xyz/.well-known/mcp/server-card.json",
       "llms_txt_url": "https://run.huggingbay.xyz/llms.txt",
       "oauth_protected_resource_url": "https://run.huggingbay.xyz/.well-known/oauth-protected-resource",
       "oauth_token_url": "https://run.huggingbay.xyz/oauth/token",
       "quickstart_url": "https://run.huggingbay.xyz/quickstart",
-      "categories": ["ai-and-machine-learning", "developer-tools", "agents"],
-      "keywords": ["mcp", "llm-router", "small-models", "inference", "agents", "openai-compatible", "provenance"]
+      "categories": [
+        "ai-and-machine-learning",
+        "developer-tools",
+        "agents"
+      ],
+      "keywords": [
+        "mcp",
+        "llm-router",
+        "small-models",
+        "inference",
+        "agents",
+        "openai-compatible",
+        "provenance"
+      ]
     }
   }
 }
