@@ -1,98 +1,63 @@
 # Bay Run
 
-Bay Run is a free-at-launch, OpenAI-compatible REST and MCP service for small-model inference at the canonical origin: <https://run.huggingbay.xyz>.
+Bay Run is the decision and execution layer for durable specialist Pins at the canonical origin: <https://run.huggingbay.xyz>.
 
-## Free launch: 30 seconds
+The default MCP front door is exactly three tools, in this order: `coprocessor`, `run_pin`, `solve_task`.
 
-The launch tier is free. Mint a demo bearer with a form-encoded `client_credentials` request, then call the API. The published guardrails are 60 requests/minute and 1,500/day; demo bearers expire after 24 hours.
+## Quickstart: connect to MCP
 
-Start with the live, copy-paste quickstart: **<https://run.huggingbay.xyz/quickstart>**.
+Use the canonical Streamable HTTP MCP endpoint: **<https://run.huggingbay.xyz/mcp/>**. The live
+copy-paste auth and request contract is kept at <https://run.huggingbay.xyz/quickstart>.
 
-The repository’s standalone demo is a small classify → signed receipt → verify flow:
-
-```bash
-python examples/bakeoff.py
-```
-
-```python
-import json
-from urllib.parse import urlencode
-from urllib.request import Request, urlopen
-
-BASE = "https://run.huggingbay.xyz"
-
-def post(path, body, headers):
-    request = Request(BASE + path, data=json.dumps(body).encode(), headers=headers)
-    return json.load(urlopen(request))
-
-token_request = Request(
-    BASE + "/oauth/token",
-    data=urlencode({"grant_type": "client_credentials"}).encode(),
-    headers={"Content-Type": "application/x-www-form-urlencoded"},
-)
-token = json.load(urlopen(token_request))["access_token"]
-headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
-result = post("/v1/classify", {"input": "The setup was quick and clear.", "model": "auto"}, headers)
-receipt = result["provenance_receipt"]
-verified = post("/v1/provenance/verify", {"receipt": receipt}, headers)
-assert verified.get("valid") is True or verified.get("receipt_valid") is True
-print(result["labels"][0])
-print("receipt verified")
-```
-
-This demo uses the real `/v1/classify` and provenance-verification surfaces; it does not invent a bake-off endpoint.
-
-## REST and SDKs
-
-The REST surface includes OpenAI-compatible `chat/completions` (including SSE streaming and tools), embeddings, reranking, classification, summarization, RAG, calculation, JSON validation, and memory. The thin SDKs live beside this checkout during build/test:
+Mint a resource-bound demo bearer, then make the primary Guard-first call:
 
 ```bash
-pip install -e ../bayrun-sdk/python
-npm install ../bayrun-sdk/js
+BASE=https://run.huggingbay.xyz
+TOKEN=$(curl -fsS -X POST "$BASE/oauth/token" \
+  -H 'Content-Type: application/json' \
+  -d '{"grant_type":"urn:bay-run:grant-type:demo","scope":"mcp:demo","resource":"https://run.huggingbay.xyz/mcp/"}' \
+  | python3 -c 'import json,sys; print(json.load(sys.stdin)["access_token"])')
+
+curl -fsS -X POST "$BASE/mcp/" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"coprocessor","arguments":{"user_text":"<untrusted request>"}}}'
 ```
 
-```python
-from bayrun import Client
+`coprocessor` runs the canonical Guard first and never generates text or executes tools. Add
+`documents` when retrieved chunks need bounded post-SAFE reranking. Read its action and evidence
+before deciding whether a caller-owned generation or tool call may continue.
 
-c = Client()
-answer = c.classify("A helpful result.")
-stream = c.chat([{"role": "user", "content": "Say hello."}], stream=True)
-```
+## Default MCP tools
 
-```js
-import { Client } from "bayrun";
+Point an MCP client at **<https://run.huggingbay.xyz/mcp/>**. The public default surface is:
 
-const c = new Client();
-const answer = await c.classify("A helpful result.");
-const stream = await c.chat([{ role: "user", content: "Say hello." }], { stream: true });
-```
+- `coprocessor` — the primary bounded Guard-first call over `user_text` and optional documents.
+- `run_pin` — the direct alias for one of the four canonical Pins, using its published `{pin_id,input}` shape.
+- `solve_task` — the open-ended fallback when no canonical Pin matches; provide `task_description` and `input`.
 
-Durable `remember`/`recall`/`forget` memory is owner-delegated and is not authorized for the shared demo bearer. Use a purpose-specific developer key or a client registered with `token_endpoint_auth_method=client_secret_post`.
+Advanced compatibility capabilities remain available through explicit live references:
 
-Adapter snippets for OpenAI Python, Vercel AI SDK, LangChain, and LlamaIndex are in [`docs/integrations.md`](docs/integrations.md).
-
-## MCP: exactly three tools
-
-Point an MCP client at **<https://run.huggingbay.xyz/mcp/>**. The live server exposes exactly:
-
-- `get_task_quote`
-- `run_task`
-- `verify_result`
-
-Token and request-shape details are kept in the live quickstart so the copy-paste contract stays current.
+- [OpenAPI](https://run.huggingbay.xyz/openapi.json)
+- [advanced MCP tools](https://run.huggingbay.xyz/.well-known/mcp/advanced-tools.json)
+- [full LLM reference](https://run.huggingbay.xyz/llms-full.txt)
+- [SDK and framework integrations](docs/integrations.md)
 
 ## Trust and data policy
 
-REST results carry signed provenance receipts, and task execution returns a signed receipt that can be checked with the verification surface. Read the receipt semantics and the live verification request at <https://run.huggingbay.xyz/quickstart>.
-
-Before sending data, read the canonical policy: <https://run.huggingbay.xyz/.well-known/data-policy.json>. The published policy says Bay Run does not train on inputs.
+Read the canonical [data policy](https://run.huggingbay.xyz/.well-known/data-policy.json) before
+sending input. The live [quickstart](https://run.huggingbay.xyz/quickstart) documents receipt
+semantics, 401 recovery, and the published limits; do not infer capabilities from advanced routes.
 
 ## Hugging Face drop-in mirror catalog
 
-Hugging Bay’s mirror catalog is available at <https://huggingbay.xyz>. For Hugging Face Hub clients that honor `HF_ENDPOINT`, point the client at the mirror origin:
+Hugging Bay’s mirror catalog is available at <https://huggingbay.xyz>. For Hugging Face Hub clients
+that honor `HF_ENDPOINT`, point the client at the mirror origin:
 
 ```bash
 export HF_ENDPOINT=https://huggingbay.xyz
 ```
 
-The catalog currently lists 893+ mirrored models. Check the mirror’s current serving status before relying on a specific model or repository path.
+For current catalog and serving information, use the generated [Bay Run status snapshot](https://run.huggingbay.xyz/status.json).
+Mirror counts and family breakdowns are intentionally not copied here because they change.

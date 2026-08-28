@@ -93,7 +93,8 @@ curl -s "$BASE/v1/embeddings" \
 ```
 
 Or point any OpenAI client at `.../v1`, or add the MCP server `.../mcp/` to your agent.
-The remote MCP publishes all 20 tools in its unauthenticated server card.
+The remote MCP publishes the current default tools `coprocessor`, `run_pin`, and `solve_task`;
+advanced capabilities are progressively disclosed through the live references.
 
 ## Files
 

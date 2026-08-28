@@ -1,7 +1,9 @@
 """
-Bay Run MCP server (auth-enabled) — point any MCP agent at the LIVE Bay Run service.
+Bay Run MCP server (auth-enabled) — a compatibility connector for older stdio-only clients.
 
-Exposes the original 9-tool connector surface. Prefer the live remote MCP for all 20 tools:
+Prefer the canonical live MCP front door, whose current default tools are exactly
+coprocessor, run_pin, and solve_task:
+The legacy connector below exposes an older compatibility subset when run locally:
     find_specialist_for_task · request_specialist · route · discover_models · eval_models ·
     embed · rerank · classify · extract
 

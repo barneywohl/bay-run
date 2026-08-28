@@ -2,8 +2,8 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.barneywohl/bay-run",
   "title": "Bay Run",
-  "description": "Free OpenAI-compatible inference with signed provenance receipts and 3 focused MCP tools.",
-  "version": "1.2.0",
+  "description": "Guard-first specialist Pin routing and execution over a 3-tool MCP front door.",
+  "version": "2.0.0",
   "websiteUrl": "https://run.huggingbay.xyz",
   "repository": {
     "url": "https://github.com/barneywohl/bay-run",
@@ -16,7 +16,7 @@
       "headers": [
         {
           "name": "Authorization",
-          "description": "Mint the bounded launch bearer using the form-encoded client_credentials request shown at https://run.huggingbay.xyz/quickstart, then send Authorization: Bearer <token>.",
+          "description": "Mint a resource-bound demo bearer using the JSON request shown at https://run.huggingbay.xyz/quickstart with resource=https://run.huggingbay.xyz/mcp/, then send Authorization: Bearer <token>. On 401, follow the MCP protected-resource metadata and retry the unchanged request once.",
           "isRequired": true,
           "isSecret": true
         }
@@ -26,9 +26,9 @@
   "_meta": {
     "io.modelcontextprotocol.registry/publisher-provided": {
       "tools": [
-        "get_task_quote",
-        "run_task",
-        "verify_result"
+        "coprocessor",
+        "run_pin",
+        "solve_task"
       ],
       "openai_compatible_base_url": "https://run.huggingbay.xyz/v1",
       "server_card_url": "https://run.huggingbay.xyz/.well-known/mcp/server-card.json",

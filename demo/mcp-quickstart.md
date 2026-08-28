@@ -1,63 +1,61 @@
-# Bay Run MCP — make your agent discover → eval → serve specialists, autonomously
+# Bay Run MCP quickstart
 
-Give any MCP agent (Claude Desktop, Claude Code, Cursor, your own) the live 20-tool surface:
-discover, evaluate, route, serve, classify, extract, summarize, RAG, speed-test, private durable
-memory, math, JSON validation, and dead-link resolution. Use `find_specialist_for_task` when you
-have labeled examples and `route` or `model="auto"` when you need the fastest warm specialist now.
+This companion quickstart follows Bay Run’s current public MCP front door. Use the
+[canonical live quickstart](https://run.huggingbay.xyz/quickstart) for auth and request details that
+may change.
 
-The remote MCP is `https://bay-run-mvp-889989800693.us-central1.run.app/mcp/`. Discovery and
-`try_bay_run` are public. Protected calls use OAuth 2.1; autonomous clients can self-mint a bounded
-credential with `client_credentials`, no client secret or browser.
+The canonical Streamable HTTP MCP URL is **<https://run.huggingbay.xyz/mcp/>**. Its default tools are
+exactly, in order: `coprocessor`, `run_pin`, `solve_task`.
 
-## Install (one command)
+## Connect
+
+Mint a resource-bound demo bearer, then add the remote server to an MCP client:
 
 ```bash
-BASE=https://bay-run-mvp-889989800693.us-central1.run.app
-TOKEN=$(curl -fsS "$BASE/oauth/token" -H 'content-type: application/json' \
-  -d '{"grant_type":"client_credentials"}' | python -c 'import json,sys; print(json.load(sys.stdin)["access_token"])')
+BASE=https://run.huggingbay.xyz
+TOKEN=$(curl -fsS -X POST "$BASE/oauth/token" \
+  -H 'Content-Type: application/json' \
+  -d '{"grant_type":"urn:bay-run:grant-type:demo","scope":"mcp:demo","resource":"https://run.huggingbay.xyz/mcp/"}' \
+  | python3 -c 'import json,sys; print(json.load(sys.stdin)["access_token"])')
+
 claude mcp add --transport http bay-run "$BASE/mcp/" \
   --header "Authorization: Bearer $TOKEN"
 ```
 
-### Claude Desktop (config JSON)
-
-`~/Library/Application Support/Claude/claude_desktop_config.json`:
+For a desktop client, the equivalent configuration is:
 
 ```json
 {
   "mcpServers": {
     "bay-run": {
       "type": "streamable-http",
-      "url": "https://bay-run-mvp-889989800693.us-central1.run.app/mcp/",
+      "url": "https://run.huggingbay.xyz/mcp/",
       "headers": {
-        "Authorization": "Bearer <short-lived OAuth access token>"
+        "Authorization": "Bearer <resource-bound demo bearer>"
       }
     }
   }
 }
 ```
 
-Restart the client. You should see the `bay-run` tools appear.
+## Start with `coprocessor`
 
-## Point it at your task (3 lines)
+The first call should be the bounded Guard-first coprocessor. It never generates text or executes
+tools; add `documents` only when retrieved chunks need bounded post-SAFE reranking.
 
-Once connected, just ask the agent in natural language — it will call the tools:
-
+```bash
+curl -fsS -X POST "$BASE/mcp/" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"coprocessor","arguments":{"user_text":"<untrusted request>"}}}'
 ```
-Use bay-run: discover embedding models for "route support tickets to a team",
-then eval_models on these 5 examples [{query, positive, negatives}...],
-then embed my next 3 tickets with the winner and tell me the routing.
-```
 
-That single prompt drives `discover_models → eval_models → embed` end to end. The agent gets back
-a ranked scorecard (MRR / nDCG), a named winner, and live embeddings — the same loop the
-[killer demo](./README.md) runs by hand.
+Use `run_pin` when a known canonical Pin matches the task. Use `solve_task` only as the open-ended
+fallback, with `task_description` and `input`. Read the action and evidence before allowing a
+caller-owned generation or tool call to continue.
 
-## Notes
-
-- **Prefer the remote MCP.** `mcp/bay_run_mcp.py` is a compatibility connector for older stdio-only
-  clients and exposes the original 9-tool subset. It self-mints OAuth when no token is configured.
-- **Cold start.** The first `eval_models`/`embed` call cold-loads models from the mirror (tens of
-  seconds); warm calls are ~100 ms. Give the agent a generous tool timeout for the first eval.
-- **Persist refresh credentials securely.** OAuth refresh preserves the agent's private memory identity;
-  never commit access or refresh credentials.
+The checked-in stdio wrapper is compatibility-only and does not define the current remote MCP
+tool contract. Advanced REST and MCP capabilities are progressively disclosed through the [OpenAPI
+contract](https://run.huggingbay.xyz/openapi.json), [advanced MCP tools](https://run.huggingbay.xyz/.well-known/mcp/advanced-tools.json),
+and [full LLM reference](https://run.huggingbay.xyz/llms-full.txt).

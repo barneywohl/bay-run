@@ -113,7 +113,8 @@ Pricing sources (Aug 2026):
 - **This demo exercises retrieval/classification, not generative extraction.** It hand-runs the
   embeddings + rerank path. HTML→structured-JSON *generative* extraction is also LIVE now (the
   `extract` tool / `POST /v1/chat/completions`, model="auto" supported) — it's just not exercised
-  in this particular ticket-routing walkthrough. Bay Run exposes 20 MCP tools in total; see the repo README.
+  in this particular ticket-routing walkthrough. The current public MCP default is `coprocessor`,
+  `run_pin`, and `solve_task`; advanced capabilities are linked from the repo README.
 - **The cost win is vs the naive LLM-classification pattern**, which is exactly what the target persona is
   overpaying for. Against a tuned embedding-API + self-hosted search you're competing on lock-in,
   neutrality, and the eval — not raw token price.
