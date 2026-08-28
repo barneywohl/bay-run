@@ -50,14 +50,11 @@ Read the canonical [data policy](https://run.huggingbay.xyz/.well-known/data-pol
 sending input. The live [quickstart](https://run.huggingbay.xyz/quickstart) documents receipt
 semantics, 401 recovery, and the published limits; do not infer capabilities from advanced routes.
 
-## Hugging Face drop-in mirror catalog
+## Hugging Bay mirror catalog
 
-Hugging Bay’s mirror catalog is available at <https://huggingbay.xyz>. For Hugging Face Hub clients
-that honor `HF_ENDPOINT`, point the client at the mirror origin:
-
-```bash
-export HF_ENDPOINT=https://huggingbay.xyz
-```
+Hugging Bay’s mirror catalog is available at <https://huggingbay.xyz>. Use each artifact's published
+download plan for the currently admitted files. A drop-in `HF_ENDPOINT` compatibility origin is not
+part of the public contract yet, so this repository does not advertise one prematurely.
 
 For current catalog and serving information, use the generated [Bay Run status snapshot](https://run.huggingbay.xyz/status.json).
 Mirror counts and family breakdowns are intentionally not copied here because they change.

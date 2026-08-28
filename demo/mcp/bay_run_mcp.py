@@ -7,9 +7,8 @@ The legacy connector below exposes an older compatibility subset when run locall
     find_specialist_for_task · request_specialist · route · discover_models · eval_models ·
     embed · rerank · classify · extract
 
-This mirrors the tool surface of the LIVE remote MCP endpoint
-(https://bay-run-mvp-889989800693.us-central1.run.app/mcp/); use this stdio wrapper when you want a
-local process instead of a remote connection. It forwards your bearer token to the service.
+This does not mirror the current default remote MCP inventory. Use it only when an older stdio client
+needs this compatibility subset; it forwards your bearer token to the service.
 
 Requires:  pip install "mcp[cli]" httpx
 Env:       BAY_RUN_BASE_URL   (default: the live service)

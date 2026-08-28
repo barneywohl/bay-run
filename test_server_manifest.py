@@ -55,6 +55,10 @@ class PublicContractTests(unittest.TestCase):
         for document in PUBLIC_MCP_DOCS:
             self.assertNotRegex(document, stale_inventory)
 
+    def test_readme_does_not_advertise_unreleased_hf_endpoint(self):
+        self.assertNotIn("export HF_ENDPOINT=", README)
+        self.assertRegex(README, re.compile(r"not\s+part of the public contract yet"))
+
 
 if __name__ == "__main__":
     unittest.main()
