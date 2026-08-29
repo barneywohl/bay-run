@@ -1,12 +1,17 @@
-# Flagship — the Semantic Intent-Router
+# Archived benchmark — Semantic Intent Router
+
+This directory preserves an earlier specialist-routing benchmark. It is not the current Bay Run
+activation path or default product surface. For a new integration, use the live
+[Bay Run quickstart](https://run.huggingbay.xyz/quickstart) and the three-tool MCP front door:
+`coprocessor`, `run_pin`, and `solve_task`.
 
 **Your agent routes every incoming message with a `$$` frontier-LLM call. Here's the exact
 same routing done by a tiny open embedder that Bay Run picks and serves — ~14× cheaper,
 ~140 ms warm, 95.8% accurate on unseen messages, open weights, no lock-in.**
 
-Every agent framework does the same sub-task on every turn: take a user message and route
-it to the right handler / tool / skill. The default is a frontier-LLM classification call —
-slow and expensive at volume. This is that sub-task, done the specialist way:
+This archived benchmark evaluates one narrow sub-task: taking a user message and routing it to
+the right handler, tool, or skill. It compares a specialist approach with an illustrative
+frontier-model baseline; it does not describe the current default onboarding flow.
 
 > **discover → eval → serve** — a 33M-param open embedder (`thenlper/gte-small`), *proven on
 > our labeled intents by a live bake-off*, then served from Bay Run's `/v1/embeddings`.
